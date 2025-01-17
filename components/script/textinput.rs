@@ -1269,9 +1269,9 @@ impl<T: ClipboardProvider> TextInput<T> {
         } else {
             Selection::NotSelected
         };
-        untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods.get_dyn_sec_label_ref(), mods.get_dyn_int_label_ref(), {
+        untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods.get_dyn_sec_label_ref(), mods.get_dyn_int_label_ref(), {
             let mut m = unwrap_mut_ref(&mut mods);
-            custom_remove(&mut m, shift_wrapper2)
+            custom_remove(&mut m, shift_wrapper2);
         });
         //mods.remove(Modifiers::SHIFT);
         

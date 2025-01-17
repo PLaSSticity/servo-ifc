@@ -1,16 +1,12 @@
 # Carapace: IFC library-specific setup
 
-Switch to the `dynamic-difc` branch.
-
-Init and update the `info-flow-library` submodule:
-```
-git submodule init
-git submodule update
-```
-
-Follow build instructions below.
-
 The Visual Studio Code instructions in `HACKING_QUICKSTART.md` are useful for getting the build working in VSCode.
+
+# Carapace code layout:
+
+Servo holds a local copy of Carapace, housed in the info-flow-library directory.
+
+Keywords used in Servo for Carapace code are "side_effect_free_attr", "InvisibleSideEffectFree", "ServoSecure" (an aliased type equivalent to "SecureValue" in Carapace), and "secure_block". 
 
 # The Servo Parallel Browser Engine Project
 
