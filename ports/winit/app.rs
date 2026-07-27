@@ -39,6 +39,7 @@ impl App {
     ) {
         let events_loop = EventsLoop::new(opts::get().headless, opts::get().output_file.is_some());
 
+        println!("After events loop");
         // Implements window methods, used by compositor.
         let window = if opts::get().headless {
             headless_window::Window::new(opts::get().initial_window_size, device_pixels_per_px)

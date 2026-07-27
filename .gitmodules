@@ -3,3 +3,6 @@
 	url = https://github.com/PLaSSticity/info-flow-library.git
 	branch = shared_code
 #Carapace: Add info-flow-library as submodule
+[submodule "elytron"]
+	path = elytron
+	url = https://github.com/PLaSSticity/elytron.git

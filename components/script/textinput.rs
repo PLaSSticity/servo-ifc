@@ -435,13 +435,19 @@ impl<T: ClipboardProvider> TextInput<T> {
     }
 
     //Carapace: added new function
-    pub fn insert_secret_string<S: Into<String> + SecureValueSafe + VisibleSideEffectFree>(&mut self, s: ServoSecureDynamic<S>) {
+    pub fn insert_secret_string<S: Into<String> + SecureValueSafe + VisibleSideEffectFree + elytron_lib::ElytronStackSafe>(&mut self, s: ServoSecureDynamic<S>) {
         if self.selection_origin.is_none() {
             self.selection_origin = Some(self.edit_point);
         }
         self.replace_selection(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, s.get_dyn_sec_label_ref(), s.get_dyn_int_label_ref(), {
             let unwrapped = unwrap(s);
-            wrap(DOMString::from_string(unchecked_operation(std::convert::Into::<String>::into(unwrapped)/*.into()*/)))
+            wrap(
+                elytron_lib::call_sandbox_closure(
+                    |s| {
+                        DOMString::from(s.into())
+                    }, unwrapped)
+            )
+            //wrap(DOMString::from_string(unchecked_operation(std::convert::Into::<String>::into(unwrapped)/*.into()*/)))
         }) /*DOMString::from(s.into())*/);
     }
 
@@ -567,6 +573,7 @@ impl<T: ClipboardProvider> TextInput<T> {
 
     /// The length of the selected text in UTF-16 code units.
     fn selection_utf16_len(&self) -> UTF16CodeUnits {
+        //Elytron: uncalled by main carapace tests
         let new_acc = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
             wrap(UTF16CodeUnits::zero())
         });
@@ -579,8 +586,16 @@ impl<T: ClipboardProvider> TextInput<T> {
                 let unwrapped = unwrap_ref(&slice);
                 let added1 = core::primitive::str::chars(unwrapped);
                 //let mapped = std::str::Chars::map(added1, core::primitive::char::len_utf16);
-                let added2 = unchecked_operation(added1.map(core::primitive::char::len_utf16).sum::<usize>());
-                unchecked_operation(*unwrapped_mut += UTF16CodeUnits{value: added2});
+                //let added2 = unchecked_operation(added1.map(core::primitive::char::len_utf16).sum::<usize>());
+                let added2 = elytron_lib::call_sandbox_closure(
+                    |a| {
+                        a.map(char::len_utf16).sum::<usize>()
+                    }, added1);
+                elytron_lib::call_sandbox_closure(
+                    |a| {
+                        *unwrapped_mut += UTF16CodeUnits{value: a}
+                    }, added2);
+                //unchecked_operation(*unwrapped_mut += UTF16CodeUnits{value: added2});
                 //map(char::len_utf16)
                 //str::chars(unwrapped)
             });
@@ -647,6 +662,7 @@ impl<T: ClipboardProvider> TextInput<T> {
     }
 
     pub fn replace_selection(&mut self, insert: /*DOMString*/ ServoSecureDynamic<DOMString>) {
+        //Elytron: uncalled by main carapace tests
         if !self.has_selection() {
             return;
         }
@@ -1052,6 +1068,7 @@ impl<T: ClipboardProvider> TextInput<T> {
     }
 
     pub fn adjust_horizontal_by_word(&mut self, direction: Direction, select: Selection) {
+        //Elytron: uncalled by main carapace tests
         if self.adjust_selection_for_horizontal_change(direction, select) {
             return;
         }
@@ -1255,6 +1272,7 @@ impl<T: ClipboardProvider> TextInput<T> {
         mut mods: ServoSecureDynamic<ModifiersWrapper>,
         macos: bool,
     ) -> KeyReaction {
+        //panic!("Panic1");
         let shift_wrapper = ModifiersWrapper{m: Modifiers::SHIFT};
         let shift_wrapper2 = ModifiersWrapper{m: Modifiers::SHIFT};
         let mods_cond_classified = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods.get_dyn_sec_label_ref(), mods.get_dyn_int_label_ref(), {
@@ -1460,6 +1478,7 @@ impl<T: ClipboardProvider> TextInput<T> {
 
     /// The total number of code units required to encode the content in utf16.
     pub fn utf16_len(&self) -> UTF16CodeUnits {
+        //panic!("Panic2");
         self.lines
             .iter()
             .fold(UTF16CodeUnits::zero(), |m, l| {
@@ -1487,6 +1506,7 @@ impl<T: ClipboardProvider> TextInput<T> {
 
     /// Get the current contents of the text input. Multiple lines are joined by \n.
     pub fn get_content(&self) -> ServoSecureDynamic<DOMString> {
+        //panic!("Panic3");
         if (self.lines.is_empty())
         {
             //TODO: use domain information from element owning this textinput
@@ -1501,7 +1521,7 @@ impl<T: ClipboardProvider> TextInput<T> {
             let lines_ref = &self.lines;
             untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &sec_label, &int_label, {
                 let mut content = std::string::String::from("");
-                for (i, line) in unchecked_operation(std::iter::Iterator::enumerate(lines_ref.iter())) {
+                for (i, line) in elytron_lib::call_sandbox_closure(|lr| {std::iter::Iterator::enumerate(lr.iter())}, lines_ref)/*unchecked_operation(std::iter::Iterator::enumerate(lines_ref.iter()))*/ {
                     std::string::String::push_str(&mut content, DOMString::to_str_ref(unwrap_ref(line)));
                     //content.push_str(unwrap_ref(&line));
                     if i < std::vec::Vec::len(lines_ref) - 1 {
@@ -1523,13 +1543,27 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// Set the current contents of the text input. If this is control supports multiple lines,
     /// any \n encountered will be stripped and force a new logical line.
     pub fn set_content(&mut self, content: SecureValue<DOMString, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>) {
+        //Elytron called in tests; breaks at the collect
+        //panic!("Panic4");
         self.lines = if self.multiline {
             //let custom_closure = |s| secret_structs::untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { wrap(DOMString::from_string(core::primitive::str::to_string(s))) });
             let result = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(&content);
                 let replaced: String = core::primitive::str::replace(DOMString::to_str_ref(unwrapped), "\r\n", "\n");
                 let split = core::primitive::str::split(&replaced, |c| c == '\n' || c == '\r');
-                let collected = unchecked_operation(split.map(|s| untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { wrap(DOMString::from_string(core::primitive::str::to_string(s))) })).collect());
+                //elytron failed conversion. Stack trace is just a segfault from the call closure instruction. 
+                //let collected = unchecked_operation(split.map(|s| untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { wrap(DOMString::from_string(core::primitive::str::to_string(s))) })).collect());
+                let collected = elytron_lib::call_sandbox_closure(
+                    |sp| {
+                        sp.map(|s| untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { 
+                            wrap(
+                                DOMString::from_string(
+                                    core::primitive::str::to_string(s)
+                                )
+                            ) 
+                        })).collect()
+                    }, split
+                );
                 wrap(collected)
             });
             trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, result.get_dyn_sec_label_ref(), result.get_dyn_int_label_ref(), {

@@ -1731,6 +1731,7 @@ impl Document {
 
     /// The entry point for all key processing for web content
     pub fn dispatch_key_event(&self, keyboard_event: SecKeyboardEvent<sec_lat::Label_Empty,int_lat::Label_All>) {
+        panic!("Panic5");
         //Carapace: Massive overhaul of entire function
 
         let focused = self.get_focused_element();
@@ -1762,7 +1763,7 @@ impl Document {
             let unwrapped_is_composing = unwrap_ref(i_c);
             let unwrapped_modifiers = unwrap_ref(m);
             let result = SecurePart::<DOMString>::new(
-                DOMString::from_string(unchecked_operation(unwrapped_state.k.to_string())) /*key_state_to_string(&unwrapped_state)*/,
+                DOMString::from_string(/*unchecked_operation(unwrapped_state.k.to_string())*/elytron_lib::call_sandbox_closure(|us| {us.k.to_string()}, unwrapped_state)) /*key_state_to_string(&unwrapped_state)*/,
                 custom_clone_key_wrapper(&unwrapped_key),
                 DOMString::from_string(unchecked_operation(unwrapped_code.c.to_string())) /*code_to_string(&unwrapped_code)*/,
                 unwrapped_location.l as u32,

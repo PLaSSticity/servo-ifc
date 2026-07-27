@@ -1506,6 +1506,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
+name = "elytron_lib"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "libc",
+]
+
+[[package]]
 name = "embedder_traits"
 version = "0.0.1"
 dependencies = [
@@ -5460,6 +5468,7 @@ dependencies = [
  "devtools_traits",
  "dom_struct",
  "domobject_derive",
+ "elytron_lib",
  "embedder_traits",
  "encoding_rs",
  "enum-iterator",
@@ -5790,6 +5799,7 @@ dependencies = [
  "backtrace",
  "cc",
  "clipboard",
+ "elytron_lib",
  "euclid",
  "getopts",
  "image 0.24.6",

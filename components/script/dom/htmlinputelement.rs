@@ -1029,6 +1029,8 @@ impl<'dom> LayoutDom<'dom, HTMLInputElement> {
 impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElement> {
     #[allow(unsafe_code)]
     fn value_for_layout(self) -> Cow<'dom, str> {
+        //panic!("Panic6");
+        //Elytron Times out with panic enabled
         fn get_raw_attr_value<'dom>(
             input: LayoutDom<'dom, HTMLInputElement>,
             default: &'static str,

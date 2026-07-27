@@ -4,7 +4,7 @@
 
 //! Selecting the default global allocator for Servo
 
-#[global_allocator]
+//#[global_allocator]
 static ALLOC: Allocator = Allocator;
 
 pub use crate::platform::*;

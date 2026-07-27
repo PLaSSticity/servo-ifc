@@ -8,6 +8,7 @@ use servo::embedder_traits::EventLoopWaker;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time;
 use winit;
+use winit::platform::x11::EventLoopBuilderExtX11;
 #[cfg(target_os = "macos")]
 use winit::platform::macos::{ActivationPolicy, EventLoopBuilderExtMacOS};
 
@@ -40,7 +41,7 @@ impl EventsLoop {
         EventsLoop(if headless {
             EventLoop::Headless(Arc::new((Mutex::new(false), Condvar::new())))
         } else {
-            EventLoop::Winit(Some(winit::event_loop::EventLoopBuilder::with_user_event().build()))
+            EventLoop::Winit(Some(winit::event_loop::EventLoopBuilder::with_user_event().with_any_thread(true).build()))
         })
     }
     #[cfg(target_os = "macos")]
