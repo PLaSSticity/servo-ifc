@@ -6,4 +6,4 @@
 [submodule "elytron"]
 	path = elytron
 	url = https://github.com/PLaSSticity/elytron.git
-	branch = main
+	branch = servo-friendly
