@@ -1,5 +1,7 @@
 # Carapace: IFC library-specific setup
 
+Run `git submodule init` and `git submodule update` to initialize the Carapace/Elytron submodules.
+
 The Visual Studio Code instructions in `HACKING_QUICKSTART.md` are useful for getting the build working in VSCode.
 
 # Carapace code layout:
