@@ -65,7 +65,9 @@ fn test_set_content_ignores_max_length() {
     );
 
     //Carapace: Changed function call to reflect Carapace API
-    textinput.set_content(info_flow_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, new_dynamic_secret_label(vec![]), new_dynamic_integrity_label(vec![]), { wrap(DOMString::from_str("mozilla rocks"))}));
+    #[cfg(feature = "servo_benchmarking_sandboxes")]
+    println!("{}:{}", file!(), line!());
+    textinput.set_content(info_flow_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, new_dynamic_secret_label(vec![]), new_dynamic_integrity_label(vec![]), { wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_str("mozilla rocks") }, ()))}));
     //Carapace: Changed test to reflect Carapace API
     assert_eq!({let result = textinput.get_content(); info_flow_block_declassify_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, result.get_dyn_sec_label(), result.get_dyn_int_label(), {unwrap(result)})}, DOMString::from("mozilla rocks"));
     assert_eq!({let result = textinput.get_content(); info_flow_block_declassify_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, result.get_dyn_sec_label(), result.get_dyn_int_label(), {unwrap(result)})}, DOMString::from("mozilla rocks"));

@@ -78,6 +78,8 @@ impl MaybeSecret<Vec<u8>> {
                         let ila = secself.get_dyn_int_label();
                         let ilb = secother.get_dyn_int_label();
                         let il = ila.join(&ilb);
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
                         MaybeSecret::Secret(
                         untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &sl, &il, {
                             let mut uself = unwrap(secself);
@@ -86,26 +88,32 @@ impl MaybeSecret<Vec<u8>> {
                             wrap(uself)
                         }))
                     },
-                    MaybeSecret::NonSecret(nother) => MaybeSecret::Secret(
+                    MaybeSecret::NonSecret(nother) => {
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
+                        MaybeSecret::Secret(
                         untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All,
                         secself.get_dyn_sec_label_ref(), secself.get_dyn_int_label_ref(), {
                             let mut uself = unwrap(secself);
                             let mut moved_other = nother;
                             std::vec::Vec::append(&mut uself, &mut moved_other);
                             wrap(uself)
-                        }))
+                        }))}
                 },
             MaybeSecret::NonSecret(mut nself) =>
                 match other
                 {
-                    MaybeSecret::Secret(secother) => MaybeSecret::Secret(
+                    MaybeSecret::Secret(secother) => {
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
+                        MaybeSecret::Secret(
                         untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All,
                         secother.get_dyn_sec_label_ref(), secother.get_dyn_int_label_ref(), {
                             let mut moved_self = nself;
                             let mut uother = unwrap(secother);
                             std::vec::Vec::append(&mut moved_self, &mut uother);
                             wrap(moved_self)
-                        })),
+                        }))},
                     MaybeSecret::NonSecret(mut nother) => {
                         nself.append(&mut nother);
                         MaybeSecret::NonSecret(nself)
@@ -615,7 +623,12 @@ impl Extractable for FormData {
         //Carapace: Explicit declassify of secret data here.
         let unwrapped_bytes = match bytes {
             MaybeSecret::NonSecret(b) => b,
-            MaybeSecret::Secret(sb) => trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, sb.get_dyn_sec_label_ref(), sb.get_dyn_int_label_ref(), { unwrap(sb) })
+            //ELYTRON: TIMING FLAG
+            MaybeSecret::Secret(sb) => {
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!()); 
+                trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, sb.get_dyn_sec_label_ref(), sb.get_dyn_int_label_ref(), { unwrap(sb) }).clone()
+            }
         };
         let total_bytes = unwrapped_bytes.len();
         let content_type = Some(DOMString::from(format!(

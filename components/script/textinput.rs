@@ -45,12 +45,12 @@ pub struct UTF8Bytes{pub value: usize}
 //Carapace: impl secretblocksafe for type
 unsafe impl InvisibleSideEffectFree for UTF8Bytes {}
 impl UTF8Bytes {
-    #[side_effect_free_attr(method)]
+    //#[side_effect_free_attr(method)]
     pub fn zero() -> UTF8Bytes {
         UTF8Bytes{value: 0}
     }
 
-    #[side_effect_free_attr(method)]
+    //#[side_effect_free_attr(method)]
     pub fn one() -> UTF8Bytes {
         UTF8Bytes{value: 1}
     }
@@ -81,11 +81,19 @@ impl UTF8Bytes {
 
 #[side_effect_free_attr]
 pub fn add_utf8(first: UTF8Bytes, second: UTF8Bytes) -> UTF8Bytes {
+    unchecked_operation(
+        #[cfg(feature = "servo_benchmarking_funcs")]
+        println!("{}:{}", file!(), line!())
+    );
     UTF8Bytes{value: first.value + second.value}
 }
 
 #[side_effect_free_attr]
 pub fn greater_utf8(first: &UTF8Bytes, second: &UTF8Bytes) -> bool {
+    unchecked_operation(
+        #[cfg(feature = "servo_benchmarking_funcs")]
+        println!("{}:{}", file!(), line!())
+    );
     first.value > second.value
 }
 
@@ -112,7 +120,7 @@ impl StrExt for str {
     }
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 fn len_utf8_str(a: &str) -> UTF8Bytes {
     UTF8Bytes{value: core::primitive::str::len(a)}
 }
@@ -123,7 +131,7 @@ pub struct UTF16CodeUnits{pub value: usize}
 unsafe impl InvisibleSideEffectFree for UTF16CodeUnits {}
 
 impl UTF16CodeUnits {
-    #[side_effect_free_attr(method)]
+    //#[side_effect_free_attr(method)]
     pub fn zero() -> UTF16CodeUnits {
         UTF16CodeUnits{value: 0}
     }
@@ -154,11 +162,19 @@ impl UTF16CodeUnits {
 
 #[side_effect_free_attr]
 pub fn add_utf16(first: UTF16CodeUnits, second: UTF16CodeUnits) -> UTF16CodeUnits {
+    unchecked_operation(
+        #[cfg(feature = "servo_benchmarking_funcs")]
+        println!("{}:{}", file!(), line!())
+    );
     UTF16CodeUnits{value: first.value + second.value}
 }
 
 #[side_effect_free_attr]
 pub fn greater_utf16(first: &UTF16CodeUnits, second: &UTF16CodeUnits) -> bool {
+    unchecked_operation(
+        #[cfg(feature = "servo_benchmarking_funcs")]
+        println!("{}:{}", file!(), line!())
+    );
     first.value > second.value
 }
 
@@ -209,12 +225,22 @@ impl TextPoint {
     fn constrain_to(&self, lines: &[SecureValue<DOMString, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>]) -> TextPoint {
         let line = min(self.line, lines.len() - 1);
 
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         TextPoint {
             line,
             index: min(self.index, trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, lines[line].get_dyn_sec_label_ref(), lines[line].get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(&lines[line]);
-                len_utf8_str(&DOMString::to_str_ref(unwrapped))
-            })/*lines[line].len_utf8()*/),
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| {
+                    len_utf8_str(&DOMString::to_str_ref(u))
+                }, unwrapped)
+                //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+            }).clone()/*lines[line].len_utf8()*/),
         }
     }
 }
@@ -298,16 +324,36 @@ pub const CMD_OR_CONTROL: Modifiers = Modifiers::CONTROL;
 /// If the string has fewer than n characters, returns the length of the whole string.
 /// If n is 0, returns 0
 fn len_of_first_n_chars(text: &SecureValue<DOMString, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>, n: SecureValue<usize, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>) -> UTF8Bytes {
+    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+    println!("{}:{}", file!(), line!());
+    //ELYTRON: TIMING_FLAG
     trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
         let unwrapped = core::primitive::str::char_indices(&unwrap_ref(text));
         let unwrapped_n = unwrap_ref(&n);
 
 
-        match custom_last(custom_take_charindices(unwrapped, *unwrapped_n)) {
+        match /*custom_last(custom_take_charindices(unwrapped, *unwrapped_n))*/
+        {
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            elytron_lib::call_sandbox_closure_timing(|(u, n)| {
+                custom_last(custom_take_charindices(u, *n))
+            }, (unwrapped, unwrapped_n))}
+        {
             Some((index, ch)) => UTF8Bytes{value: index + core::primitive::char::len_utf8(ch)},
-            None => UTF8Bytes::zero(),
+            None => {
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|a: u32| {
+                    UTF8Bytes::zero()
+                }, 0)
+            },
         }
-    })
+    }).clone()
     /*match text.char_indices().take(n).last() {
         Some((index, ch)) => UTF8Bytes(index + ch.len_utf8()),
         None => UTF8Bytes::zero(),
@@ -324,13 +370,24 @@ fn len_of_first_n_code_units(text: &ServoSecureDynamic<DOMString> /*&str*/, n: U
     let mut utf16_len = info_flow_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label(), text.get_dyn_int_label(), {
         wrap(UTF16CodeUnits::zero())
     });*/
+    #[cfg(feature = "servo_benchmarking_blocks")]
+    println!("{}:{}", file!(), line!());
     let utf8_len = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
         let unwrapped_str = unwrap_ref(&text);
         //let mut unwrapped_utf16 = unwrap_mut_ref(&mut utf16_len);
         //let mut unwrapped_utf8 = unwrap_mut_ref(&mut utf8_len);
         let mut utf16_val: usize = 0;
         let mut utf8_val: usize = 0;
-        for c in core::primitive::str::chars(std::string::String::as_str(DOMString::to_string_ref(unwrapped_str))) {
+        unchecked_operation(
+            #[cfg(feature = "servo_benchmarking_sandboxes")]
+            println!("{}:{}", file!(), line!())
+        );
+        for c in core::primitive::str::chars(std::string::String::as_str(
+            elytron_lib::call_sandbox_closure_timing(|s| {
+                DOMString::to_string_ref(s)
+            }, unwrapped_str)
+            //DOMString::to_string_ref(unwrapped_str)
+        )) {
             utf16_val += core::primitive::char::len_utf16(c);
             if utf16_val > n.value {
                 break;
@@ -339,9 +396,12 @@ fn len_of_first_n_code_units(text: &ServoSecureDynamic<DOMString> /*&str*/, n: U
         }
         wrap(UTF8Bytes{value: utf8_val})
     });
+    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+    println!("{}:{}", file!(), line!());
+    //ELYTRON: TIMING_FLAG
     trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
         unwrap(utf8_len)
-    })
+    }).clone()
     /*for c in text.chars() {
         utf16_len += UTF16CodeUnits{value: c.len_utf16()};
         if utf16_len > n {
@@ -373,6 +433,8 @@ impl<T: ClipboardProvider> TextInput<T> {
             selection_direction: selection_direction,
             was_last_change_by_set_content: true,
         };
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         i.set_content(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {wrap(initial)}));
         i
     }
@@ -413,8 +475,14 @@ impl<T: ClipboardProvider> TextInput<T> {
         if self.selection_origin.is_none() || self.selection_origin == Some(self.edit_point) {
             self.adjust_horizontal_by_one(dir, Selection::Selected);
         }
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         self.replace_selection( untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
-            wrap(DOMString::from_string(std::string::String::from("")))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(std::string::String::from("")) }, ()))
         }) /*DOMString::new()*/ );
     }
 
@@ -429,25 +497,37 @@ impl<T: ClipboardProvider> TextInput<T> {
             self.selection_origin = Some(self.edit_point);
         }
         let s_new: String = s.into();
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         self.replace_selection(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
-            wrap(DOMString::from_string(s_new))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(s_new) }, ()))
         }) /*DOMString::from(s.into())*/);
     }
 
     //Carapace: added new function
-    pub fn insert_secret_string<S: Into<String> + SecureValueSafe + VisibleSideEffectFree + elytron_lib::ElytronStackSafe>(&mut self, s: ServoSecureDynamic<S>) {
+    pub fn insert_secret_string<S: Into<String> + SecureValueSafe + VisibleSideEffectFree + elytron_lib::ElytronStackSafe + InvisibleSideEffectFree>(&mut self, s: ServoSecureDynamic<S>) {
+        //Elytron: Not called
         if self.selection_origin.is_none() {
             self.selection_origin = Some(self.edit_point);
         }
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         self.replace_selection(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, s.get_dyn_sec_label_ref(), s.get_dyn_int_label_ref(), {
             let unwrapped = unwrap(s);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
             wrap(
-                elytron_lib::call_sandbox_closure(
+                elytron_lib::call_sandbox_closure_timing(
                     |s| {
                         DOMString::from(s.into())
                     }, unwrapped)
             )
-            //wrap(DOMString::from_string(unchecked_operation(std::convert::Into::<String>::into(unwrapped)/*.into()*/)))
         }) /*DOMString::from(s.into())*/);
     }
 
@@ -518,13 +598,25 @@ impl<T: ClipboardProvider> TextInput<T> {
         if let Some(begin) = self.selection_origin {
             debug_assert!(begin.line < self.lines.len());
             let lines_ref = &self.lines;
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             let classified_len_utf8 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, lines_ref[begin.line].get_dyn_sec_label_ref(), lines_ref[begin.line].get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(&lines_ref[begin.line]);
-                wrap(len_utf8_str(&DOMString::to_str_ref(unwrapped)))
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                    len_utf8_str(&DOMString::to_str_ref(u))
+                }, unwrapped))
+                    //len_utf8_str(&DOMString::to_str_ref(unwrapped)))
             });
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             debug_assert!(begin.index <= trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, classified_len_utf8.get_dyn_sec_label_ref(), classified_len_utf8.get_dyn_int_label_ref(), {
                unwrap(classified_len_utf8)
-            }) /*self.lines[begin.line].len_utf8()*/ );
+            }).clone() /*self.lines[begin.line].len_utf8()*/ );
 
             match self.selection_direction {
                 SelectionDirection::None | SelectionDirection::Forward => {
@@ -538,16 +630,31 @@ impl<T: ClipboardProvider> TextInput<T> {
         debug_assert!(self.edit_point.line < self.lines.len());
         let lines_ref = &self.lines;
         let line_usize = self.edit_point.line;
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let classified_len_utf8 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[self.edit_point.line].get_dyn_sec_label_ref(), self.lines[self.edit_point.line].get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&lines_ref[line_usize]);
-            wrap(len_utf8_str(&DOMString::to_str_ref(unwrapped)))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                len_utf8_str(&DOMString::to_str_ref(u))
+            }, unwrapped))
+                
+                //len_utf8_str(&DOMString::to_str_ref(unwrapped)))
         });
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         debug_assert!(self.edit_point.index <= trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, classified_len_utf8.get_dyn_sec_label_ref(), classified_len_utf8.get_dyn_int_label_ref(), {
             unwrap(classified_len_utf8)
-        }) /*self.lines[self.edit_point.line].len_utf8()*/ );
+        }).clone() /*self.lines[self.edit_point.line].len_utf8()*/ );
     }
 
     pub fn get_selection_text(&self) -> Option<SecureValue<String, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>> {
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let new = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
             wrap(std::string::String::new())
         });
@@ -555,16 +662,21 @@ impl<T: ClipboardProvider> TextInput<T> {
         let text = self.fold_selection_slices(new, |s, slice| {
             let s_label = s.get_dyn_sec_label_ref().join(slice.get_dyn_sec_label_ref());
             let i_label = s.get_dyn_int_label_ref().join(slice.get_dyn_int_label_ref());
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &s_label, &i_label, {
                 let mut unwrapped_mut = unwrap_mut_ref(s);
                 let unwrapped = unwrap_ref(&slice);
                 std::string::String::push_str(unwrapped_mut, unwrapped);
             });
         }/*s.push_str(slice)*/);
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let bool_check = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&text);
             std::string::String::is_empty(unwrapped)
-        });
+        }).clone();
         if bool_check /*text.is_empty()*/ {
             return None;
         }
@@ -573,37 +685,51 @@ impl<T: ClipboardProvider> TextInput<T> {
 
     /// The length of the selected text in UTF-16 code units.
     fn selection_utf16_len(&self) -> UTF16CodeUnits {
-        //Elytron: uncalled by main carapace tests
+        //Elytron: Not called by main carapace tests
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let new_acc = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
-            wrap(UTF16CodeUnits::zero())
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { UTF16CodeUnits::zero() }, ()))
         });
         //Carapace: changed function
         let result = self.fold_selection_slices(new_acc, |len, slice| {
             let s_label = len.get_dyn_sec_label_ref().join(slice.get_dyn_sec_label_ref());
             let i_label = len.get_dyn_int_label_ref().join(slice.get_dyn_int_label_ref());
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &s_label, &i_label, {
-                let mut unwrapped_mut = unwrap_mut_ref(len);
+                let unwrapped_len = unwrap_ref(&len);
                 let unwrapped = unwrap_ref(&slice);
                 let added1 = core::primitive::str::chars(unwrapped);
                 //let mapped = std::str::Chars::map(added1, core::primitive::char::len_utf16);
-                //let added2 = unchecked_operation(added1.map(core::primitive::char::len_utf16).sum::<usize>());
-                let added2 = elytron_lib::call_sandbox_closure(
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let new_len = elytron_lib::call_sandbox_closure_timing(
                     |a| {
-                        a.map(char::len_utf16).sum::<usize>()
+                        let added2 = a.map(char::len_utf16).sum::<usize>();
+                        let mut unwrapped_mut_1 = unwrapped_len.clone();
+                        unwrapped_mut_1 += UTF16CodeUnits{value: added2};
+                        unwrapped_mut_1
                     }, added1);
-                elytron_lib::call_sandbox_closure(
-                    |a| {
-                        *unwrapped_mut += UTF16CodeUnits{value: a}
-                    }, added2);
-                //unchecked_operation(*unwrapped_mut += UTF16CodeUnits{value: added2});
+                let mut unwrapped_mut_2 = unwrap_mut_ref(len);
+                *unwrapped_mut_2 = new_len;
                 //map(char::len_utf16)
                 //str::chars(unwrapped)
             });
             /* *len += UTF16CodeUnits(slice.chars().map(char::len_utf16).sum::<usize>())*/
         });
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, result.get_dyn_sec_label_ref(), result.get_dyn_int_label_ref(), {
             unwrap(result)
-        })
+        }).clone()
     }
 
     /// Run the callback on a series of slices that, concatenated, make up the selected text.
@@ -619,39 +745,67 @@ impl<T: ClipboardProvider> TextInput<T> {
 
             if start.line == end.line {
                 let lines_ref = &self.lines;
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let a: SecureValue<&str, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>> = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[start.line].get_dyn_sec_label_ref(), self.lines[start.line].get_dyn_int_label_ref(), {
                     let a: &DOMString = unwrap_ref(&lines_ref[start.line]);
-                    let b: &str = DOMString::to_str_ref(a);
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    let b: &str = elytron_lib::call_sandbox_closure_timing(|u: ()| { DOMString::to_str_ref(a) }, ());
                     wrap(&b[start_offset..end_offset])
                 }); 
                 f(&mut acc, a/*&self.lines[start.line][start_offset..end_offset]*/)
             } else {
                 let lines_ref = &self.lines;
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let a = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[start.line].get_dyn_sec_label_ref(), self.lines[start.line].get_dyn_int_label_ref(), {
                     let a = unwrap_ref(&lines_ref[start.line]);
-                    let b = &DOMString::to_str_ref(a)[start_offset..];
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    let b = elytron_lib::call_sandbox_closure_timing(|u: ()| { &DOMString::to_str_ref(a)[start_offset..] }, ());
                     wrap(b)
                 }); 
                 f(&mut acc, a/*&self.lines[start.line][start_offset..]*/);
                 for line in &self.lines[start.line + 1..end.line] {
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     let a = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
                         wrap("\n")
                     });
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     let b = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[start.line].get_dyn_sec_label_ref(), self.lines[start.line].get_dyn_int_label_ref(), {
                         let a = unwrap_ref(&line);
-                        wrap(DOMString::to_str_ref(&a))
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        wrap(elytron_lib::call_sandbox_closure_timing(|u: ()| { DOMString::to_str_ref(&a) }, ()))
                     }); 
                     f(&mut acc, a/*"\n"*/);
                     f(&mut acc, b/*line*/);
                 }
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let a = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
                     wrap("\n")
                 });
                 f(&mut acc, a/*"\n"*/);
                 let lines_ref = &self.lines;
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let a = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[end.line].get_dyn_sec_label_ref(), self.lines[end.line].get_dyn_int_label_ref(), {
                     let a = unwrap_ref(&lines_ref[end.line]);
-                    let b = &DOMString::to_str_ref(a)[..end_offset];
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    let b = elytron_lib::call_sandbox_closure_timing(|u: ()| { &DOMString::to_str_ref(a)[..end_offset] }, ());
                     wrap(b)
                 }); 
                 f(&mut acc, a/*&self.lines[end.line][..end_offset]*/)
@@ -662,7 +816,7 @@ impl<T: ClipboardProvider> TextInput<T> {
     }
 
     pub fn replace_selection(&mut self, insert: /*DOMString*/ ServoSecureDynamic<DOMString>) {
-        //Elytron: uncalled by main carapace tests
+        //Elytron: Not called by main carapace tests
         if !self.has_selection() {
             return;
         }
@@ -679,9 +833,15 @@ impl<T: ClipboardProvider> TextInput<T> {
             len_of_first_n_code_units(&/***/insert, allowed_to_insert_count).value;
             //usize 
         //let to_insert = &insert[..last_char_index];
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let to_insert = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, insert.get_dyn_sec_label_ref(), insert.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&insert);
-            wrap(&((DOMString::to_str_ref(&unwrapped))[..last_char_index]))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|u: ()| { &(DOMString::to_str_ref(&unwrapped))[..last_char_index] }, ()))
         });
 
         let (start, end) = self.sorted_selection_bounds();
@@ -697,18 +857,30 @@ impl<T: ClipboardProvider> TextInput<T> {
             let lines_suffix = &self.lines[end.line + 1..];
 
             let mut initial_insert_lines = if self.multiline {
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_unchecked"))]
+                println!("{}:{}", file!(), line!());
                 untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, to_insert.get_dyn_sec_label_ref(), to_insert.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&to_insert);
                     let splits = core::primitive::str::split(unwrapped, |c| c == '\n');
-                    let collected = unchecked_operation(splits.map(|s| DOMString::from_string(std::string::String::from(s))).collect());
+                    let collected = unchecked_operation(splits.map(|s| {
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!());
+                        elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(std::string::String::from(s)) }, ())
+                    }).collect());
                     wrap(collected)
                 })
                 //to_insert.split('\n').map(|s| DOMString::from(s)).collect()
             } else {
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, to_insert.get_dyn_sec_label_ref(), to_insert.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&to_insert);
                     let mut v = std::vec::Vec::new();
-                    std::vec::Vec::push(&mut v, DOMString::from_string(std::string::String::from(*unwrapped)));
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    std::vec::Vec::push(&mut v, elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(std::string::String::from(*unwrapped)) }, ()));
                     wrap(v)
                     //vec![DOMString::from(to_insert)]
                 })
@@ -716,11 +888,16 @@ impl<T: ClipboardProvider> TextInput<T> {
 
             let mut insert_lines = {
                 let mut returned = vec![];
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let length = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, initial_insert_lines.get_dyn_sec_label_ref(), initial_insert_lines.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&initial_insert_lines);
                     std::vec::Vec::len(unwrapped)
-                });
+                }).clone();
                 for i in 0..length {
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     returned.insert(0, untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, initial_insert_lines.get_dyn_sec_label_ref(), initial_insert_lines.get_dyn_int_label_ref(), {
                             let mut vec = unwrap_mut_ref(&mut initial_insert_lines);
                             let popped = std::vec::Vec::pop(vec);
@@ -737,33 +914,68 @@ impl<T: ClipboardProvider> TextInput<T> {
             let lines_ref = &self.lines;
             let merged_sec_label = self.lines[start.line].get_dyn_sec_label_ref().join(insert_lines[0].get_dyn_sec_label_ref());
             let merged_int_label = self.lines[start.line].get_dyn_int_label_ref().join(insert_lines[0].get_dyn_int_label_ref());
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             let mut new_line = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &merged_sec_label, &merged_int_label, {
                 let unwrapped = unwrap_ref(&lines_ref[start.line]);
-                let pre_string = core::primitive::str::as_bytes(&DOMString::to_str_ref(unwrapped)[..start_offset]);
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let pre_string = core::primitive::str::as_bytes(elytron_lib::call_sandbox_closure_timing(|u: ()| { &DOMString::to_str_ref(unwrapped)[..start_offset] }, ()));
                 let owned = <[u8]>::to_owned(&pre_string);
                 wrap(unsafe { std::string::String::from_utf8_unchecked(owned) })
             });
             //let mut new_line = prefix.to_owned();
 
             let insert_zero_ref = &insert_lines[0];
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &merged_sec_label, &merged_int_label, {
                 let mut mut_unwrapped = unwrap_mut_ref(&mut new_line);
                 let unwrapped = unwrap_ref(insert_zero_ref);
-                std::string::String::push_str(mut_unwrapped, std::string::String::as_str(DOMString::to_string_ref(unwrapped)));
+                std::string::String::push_str(mut_unwrapped, std::string::String::as_str(
+                    {
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        elytron_lib::call_sandbox_closure_timing(|u| {
+                            DOMString::to_string_ref(u)
+                        }, unwrapped)
+                    }
+                    //DOMString::to_string_ref(unwrapped)
+                ));
             });
             //new_line.push_str(&insert_lines[0]);
             //insert_lines[0] = DOMString::from(new_line);
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             insert_lines[0] = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &merged_sec_label, &merged_int_label, {
                 let unwrapped = unwrap(new_line);
-                wrap(DOMString::from_string(unwrapped))
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(unwrapped) }, ()))
             });
 
             let last_insert_lines_index = insert_lines.len() - 1;
             let last_insert_lines_ref = &insert_lines[insert_lines.len() - 1];
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             self.edit_point.index = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, insert_lines[last_insert_lines_index].get_dyn_sec_label_ref(), insert_lines[last_insert_lines_index].get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(last_insert_lines_ref);
-                len_utf8_str(&DOMString::to_str_ref(unwrapped))
-            });
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| {
+                    len_utf8_str(&DOMString::to_str_ref(u))
+                }, unwrapped)
+                //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+            }).clone();
             //self.edit_point.index = insert_lines[last_insert_lines_index].len_utf8();
             self.edit_point.line = start.line + last_insert_lines_index;
 
@@ -773,11 +985,17 @@ impl<T: ClipboardProvider> TextInput<T> {
 
             let s_label = to_unwrap.get_dyn_sec_label_ref().join(self.lines[end.line].get_dyn_sec_label_ref());
             let i_label = to_unwrap.get_dyn_int_label_ref().join(self.lines[end.line].get_dyn_int_label_ref());
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &s_label, &i_label, {
                 let mut mut_unwrapped = unwrap_mut_ref(to_unwrap);
                 let mut mut_string = DOMString::to_mut_string_ref(mut_unwrapped);
                 let unwrapped = unwrap_ref(&lines_ref[end.line]);
-                let pre_string = &DOMString::to_str_ref(unwrapped)[end_offset..];
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let pre_string = elytron_lib::call_sandbox_closure_timing(|u: ()| { &DOMString::to_str_ref(unwrapped)[end_offset..] }, ());
                 std::string::String::push_str(mut_string, pre_string);
             });
             //insert_lines[last_insert_lines_index].push_str(suffix);
@@ -799,10 +1017,20 @@ impl<T: ClipboardProvider> TextInput<T> {
     pub fn current_line_length(&self) -> UTF8Bytes {
         let lines_ref = &self.lines;
         let edit_point_line = self.edit_point.line;
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[self.edit_point.line].get_dyn_sec_label_ref(), self.lines[self.edit_point.line].get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&lines_ref[edit_point_line]);
-            len_utf8_str(&DOMString::to_str_ref(unwrapped))
-        })
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            elytron_lib::call_sandbox_closure_timing(|u| {
+                len_utf8_str(&DOMString::to_str_ref(u))
+            }, unwrapped)
+            //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+        }).clone()
     }
 
     /// Adjust the editing point position by a given number of lines. The resulting column is
@@ -852,9 +1080,15 @@ impl<T: ClipboardProvider> TextInput<T> {
         //let UTF8Bytes(edit_index) = self.edit_point.index;
         let lines_ref = &self.lines;
         let edit_line = self.edit_point.line;
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let col = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[self.edit_point.line].get_dyn_sec_label_ref(), self.lines[self.edit_point.line].get_dyn_int_label_ref(), {
             let unwrapped_u = unwrap_ref(&lines_ref[edit_line]);
-            let chs = core::primitive::str::chars(&DOMString::to_str_ref(unwrapped_u)[..edit_index]);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            let chs = core::primitive::str::chars(elytron_lib::call_sandbox_closure_timing(|u: ()| { &DOMString::to_str_ref(unwrapped_u)[..edit_index] }, ()));
             wrap(std::str::Chars::count(chs))
         });
         /*let col = self.lines[self.edit_point.line][..edit_index]
@@ -904,32 +1138,55 @@ impl<T: ClipboardProvider> TextInput<T> {
             //let UTF8Bytes(current_offset) = self.edit_point.index;
             let next_ch = match direction {
                 Direction::Forward => {
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, current_line.get_dyn_sec_label_ref(), current_line.get_dyn_int_label_ref(),{
                         let unwrapped = unwrap_ref(&current_line);
-                        let mut gs = custom_graphemes(&DOMString::to_str_ref(unwrapped)[current_offset..], true);
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        let mut gs = elytron_lib::call_sandbox_closure_timing(|a: ()| { custom_graphemes(&DOMString::to_str_ref(unwrapped)[current_offset..], true) }, ());
                         wrap(custom_next_back(&mut gs))
                     })
                 },
                 //Direction::Forward => current_line[current_offset..].graphemes(true).next(),
                 Direction::Backward => {
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, current_line.get_dyn_sec_label_ref(), current_line.get_dyn_int_label_ref(),{
                         let unwrapped = unwrap_ref(&current_line);
-                        let mut gs = custom_graphemes(&DOMString::to_str_ref(unwrapped)[..current_offset], true);
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        let mut gs = elytron_lib::call_sandbox_closure_timing(|a: ()| { custom_graphemes(&DOMString::to_str_ref(unwrapped)[..current_offset], true) }, ());
                         wrap(custom_next_back(&mut gs))
                     })
                 },
                 //Direction::Backward => current_line[..current_offset].graphemes(true).next_back(),
             };
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             let result = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, next_ch.get_dyn_sec_label_ref(), next_ch.get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(&next_ch);
                 match *unwrapped {
-                    None => wrap(UTF8Bytes::one()),
+                    None => wrap({
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        elytron_lib::call_sandbox_closure_timing(|a: ()| { UTF8Bytes::one() }, ())
+                    }),
                     Some(c) => wrap(UTF8Bytes{value: core::primitive::str::len(c) as usize})
                 }
             });
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, result.get_dyn_sec_label_ref(), result.get_dyn_int_label_ref(), {
                 unwrap(result)
-            })
+            }).clone()
             /*
             match next_ch {
                 Some(c) => UTF8Bytes{value: c.len() as usize},
@@ -1030,6 +1287,8 @@ impl<T: ClipboardProvider> TextInput<T> {
             KeyReaction::TriggerDefaultAction
         } else {
             let string = '\n'.to_string();
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             self.insert_secret_string(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &sec_label, &int_label, {
                 wrap(string)
             }));
@@ -1047,10 +1306,20 @@ impl<T: ClipboardProvider> TextInput<T> {
         let last_line = self.lines.len() - 1;
         self.edit_point.line = last_line;
         let lines_ref = &self.lines;
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         self.edit_point.index = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[last_line].get_dyn_sec_label_ref(), self.lines[last_line].get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&lines_ref[last_line]);
-            len_utf8_str(&DOMString::to_str_ref(unwrapped))
-        })/*self.lines[last_line].len_utf8()*/;
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            elytron_lib::call_sandbox_closure_timing(|u| {
+                len_utf8_str(&DOMString::to_str_ref(u))
+            }, unwrapped)
+            //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+        }).clone()/*self.lines[last_line].len_utf8()*/;
         self.selection_direction = SelectionDirection::Forward;
         self.assert_ok_selection();
     }
@@ -1068,7 +1337,7 @@ impl<T: ClipboardProvider> TextInput<T> {
     }
 
     pub fn adjust_horizontal_by_word(&mut self, direction: Direction, select: Selection) {
-        //Elytron: uncalled by main carapace tests
+        //Elytron: Not called by main carapace tests
         if self.adjust_selection_for_horizontal_change(direction, select) {
             return;
         }
@@ -1082,6 +1351,8 @@ impl<T: ClipboardProvider> TextInput<T> {
                     let input: SecureValue<&str, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>;
                     if current_index == UTF8Bytes::zero() && current_line > 0 {
                         let lines_ref = &self.lines;
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
                         input = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[current_line - 1].get_dyn_sec_label_ref(), self.lines[current_line - 1].get_dyn_int_label_ref(), {
                             let u = &**unwrap_ref(&lines_ref[current_line - 1]);
                             wrap(u)
@@ -1091,21 +1362,41 @@ impl<T: ClipboardProvider> TextInput<T> {
                         let remaining = current_index.value;
                         //let UTF8Bytes(remaining) = current_index;
                         let lines_ref = &self.lines;
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
                         input = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[current_line].get_dyn_sec_label_ref(), self.lines[current_line - 1].get_dyn_int_label_ref(), {
-                            let u = DOMString::to_str_ref(unwrap_ref(&lines_ref[current_line]));
+                            let unwrapped = unwrap_ref(&lines_ref[current_line]);
+                            unchecked_operation(
+                                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                                println!("{}:{}", file!(), line!())
+                            );
+                            let u = elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped)}, ());
                             wrap(&u[..remaining])
                         })/*&self.lines[current_line][..remaining]*/;
                     }
 
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     let new_utf8 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, input.get_dyn_sec_label_ref(), input.get_dyn_int_label_ref(), {
                         let unwrapped = unwrap_ref(&input);
                         let mut iter = custom_split_word_bounds(unwrapped);
                         let mut iter2 = custom_rev(iter);
-                        let mut result = UTF8Bytes::zero();
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        let mut result = elytron_lib::call_sandbox_closure_timing(|a: u32| {
+                            UTF8Bytes::zero()
+                        }, 0);
+                        //let mut result = UTF8Bytes::zero();
                         loop {
                             match custom_next_rev(&mut iter2) {
                                 None => break,
                                 Some(x) => {
+                                    unchecked_operation(
+                                        #[cfg(feature = "servo_benchmarking_unchecked")]
+                                        println!("{}:{}", file!(), line!())
+                                    );
                                     unchecked_operation(result += UTF8Bytes{value: x.len() as usize});
                                     let mut chars = core::primitive::str::chars(x);
                                     if std::str::Chars::any(&mut chars, |x| core::primitive::char::is_alphabetic(x) || core::primitive::char::is_numeric(x)) {
@@ -1116,9 +1407,12 @@ impl<T: ClipboardProvider> TextInput<T> {
                         }
                         wrap(result)
                     });
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
                     shift_temp = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, new_utf8.get_dyn_sec_label_ref(), new_utf8.get_dyn_int_label_ref(), {
                         unwrap(new_utf8)
-                    });
+                    }).clone();
                     /*let mut iter = input.split_word_bounds().rev();
                     loop {
                         match iter.next() {
@@ -1138,6 +1432,8 @@ impl<T: ClipboardProvider> TextInput<T> {
                     if remaining == UTF8Bytes::zero() && self.lines.len() > self.edit_point.line + 1
                     {
                         let lines_ref = &self.lines;
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
                         input = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[current_line + 1].get_dyn_sec_label_ref(), self.lines[current_line + 1].get_dyn_int_label_ref(), {
                             let u = &**unwrap_ref(&lines_ref[current_line + 1]);
                             wrap(u)
@@ -1148,20 +1444,40 @@ impl<T: ClipboardProvider> TextInput<T> {
                         let current_offset = current_index.value;
                         //let UTF8Bytes(current_offset) = current_index;
                         let lines_ref = &self.lines;
+                        #[cfg(feature = "servo_benchmarking_blocks")]
+                        println!("{}:{}", file!(), line!());
                         input = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[current_line].get_dyn_sec_label_ref(), self.lines[current_line - 1].get_dyn_int_label_ref(), {
-                            let u = DOMString::to_str_ref(unwrap_ref(&lines_ref[current_line]));
+                            let unwrapped = unwrap_ref(&lines_ref[current_line]);
+                            unchecked_operation(
+                                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                                println!("{}:{}", file!(), line!())
+                            );
+                            let u = elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped) }, ());
                             wrap(&u[current_offset..])
                         })/*&self.lines[current_line][current_offset..]*/;
                     }
 
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     let new_utf8 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, input.get_dyn_sec_label_ref(), input.get_dyn_int_label_ref(), {
                         let unwrapped = unwrap_ref(&input);
                         let mut iter = custom_split_word_bounds(unwrapped);
-                        let mut result = UTF8Bytes::zero();
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        let mut result = elytron_lib::call_sandbox_closure_timing(|a: u32| {
+                            UTF8Bytes::zero()
+                        }, 0);
+                        //let mut result = UTF8Bytes::zero();
                         loop {
                             match custom_next_uwordbounds(&mut iter) {
                                 None => break,
                                 Some(x) => {
+                                    unchecked_operation(
+                                        #[cfg(feature = "servo_benchmarking_unchecked")]
+                                        println!("{}:{}", file!(), line!())
+                                    );
                                     unchecked_operation(result += UTF8Bytes{value: x.len() as usize});
                                     let mut chars = core::primitive::str::chars(x);
                                     if std::str::Chars::any(&mut chars, |x| core::primitive::char::is_alphabetic(x) || core::primitive::char::is_numeric(x)) {
@@ -1172,9 +1488,12 @@ impl<T: ClipboardProvider> TextInput<T> {
                         }
                         wrap(result)
                     });
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
                     shift_temp = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, new_utf8.get_dyn_sec_label_ref(), new_utf8.get_dyn_int_label_ref(), {
                         unwrap(new_utf8)
-                    });
+                    }).clone();
                     /*let mut iter = input.split_word_bounds();
                     loop {
                         match iter.next() {
@@ -1206,16 +1525,30 @@ impl<T: ClipboardProvider> TextInput<T> {
             //let UTF8Bytes(current_offset) = self.edit_point.index;
             match direction {
                 Direction::Backward => {
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
                     trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, current_line.get_dyn_sec_label_ref(), current_line.get_dyn_int_label_ref(), {
                         let unwrapped = unwrap_ref(&current_line);
-                        core::primitive::str::len(&DOMString::to_str_ref(unwrapped)[..current_offset])
-                    })
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        core::primitive::str::len(elytron_lib::call_sandbox_closure_timing(|u: ()| { &DOMString::to_str_ref(unwrapped)[..current_offset]}, ()))
+                    }).clone()
                 } /*current_line[..current_offset].len()*/,
                 Direction::Forward =>  {
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
                     trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, current_line.get_dyn_sec_label_ref(), current_line.get_dyn_int_label_ref(), {
                         let unwrapped = unwrap_ref(&current_line);
-                        core::primitive::str::len(&DOMString::to_str_ref(unwrapped)[current_offset..])
-                    })
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        core::primitive::str::len(elytron_lib::call_sandbox_closure_timing(|a: ()| { &DOMString::to_str_ref(unwrapped)[current_offset..] }, ()))
+                    }).clone()
                 } /*current_line[current_offset..].len()*/,
             }
         };
@@ -1235,10 +1568,20 @@ impl<T: ClipboardProvider> TextInput<T> {
                 self.edit_point.line = &self.lines.len() - 1;
                 let lines_ref = &self.lines;
                 let lines_ref_index = &self.lines.len() - 1;
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 self.edit_point.index = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, self.lines[&self.lines.len() - 1].get_dyn_sec_label_ref(), self.lines[&self.lines.len() - 1].get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&lines_ref[lines_ref_index]);
-                    len_utf8_str(&DOMString::to_str_ref(unwrapped))
-                }); /*(&self.lines[&self.lines.len() - 1]).len_utf8();*/
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| {
+                        len_utf8_str(&DOMString::to_str_ref(u))
+                    }, unwrapped)
+                    //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+                }).clone(); /*(&self.lines[&self.lines.len() - 1]).len_utf8();*/
             },
         }
     }
@@ -1273,34 +1616,80 @@ impl<T: ClipboardProvider> TextInput<T> {
         macos: bool,
     ) -> KeyReaction {
         //panic!("Panic1");
+        //Elytron: Not called
         let shift_wrapper = ModifiersWrapper{m: Modifiers::SHIFT};
         let shift_wrapper2 = ModifiersWrapper{m: Modifiers::SHIFT};
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let mods_cond_classified = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods.get_dyn_sec_label_ref(), mods.get_dyn_int_label_ref(), {
             let m = unwrap_ref(&mods);
-            wrap(custom_contains(m, shift_wrapper))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|(m2, s)| {
+                custom_contains(m2, s)
+            }, (m, shift_wrapper))/*custom_contains(m, shift_wrapper)*/)
         });
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let mods_cond_declassified = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods_cond_classified.get_dyn_sec_label_ref(), mods_cond_classified.get_dyn_int_label_ref(), {
             unwrap(mods_cond_classified)
-        });
+        }).clone();
         let maybe_select = if mods_cond_declassified /*mods.contains(Modifiers::SHIFT)*/ {
             Selection::Selected
         } else {
             Selection::NotSelected
         };
+        //ELYTRON: Clone example
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods.get_dyn_sec_label_ref(), mods.get_dyn_int_label_ref(), {
-            let mut m = unwrap_mut_ref(&mut mods);
-            custom_remove(&mut m, shift_wrapper2);
+            let m = unwrap_ref(&mods);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            let m3 = elytron_lib::call_sandbox_closure_timing(|u: ()| { 
+                let mut m2 = m.clone();
+                custom_remove(&mut m2, shift_wrapper2);
+                m2
+            }, ());
+            let m4 = unwrap_mut_ref(&mut mods);
+            *m4 = m3;
         });
         //mods.remove(Modifiers::SHIFT);
         
         //Carapace: DECLASSIFY 
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let k = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, key.get_dyn_sec_label_ref(), key.get_dyn_int_label_ref(), {
-            custom_clone_key_wrapper(unwrap_ref(&key))
-        }).k;
+            let k2 = unwrap_ref(&key);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            elytron_lib::call_sandbox_closure_timing(|k3| {
+                custom_clone_key_wrapper(k3)
+            }, k2)
+            //custom_clone_key_wrapper(unwrap_ref(&key))
+        }).clone().k;
         //Carapace: DECLASSIFY
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let m: Modifiers = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, mods.get_dyn_sec_label_ref(), mods.get_dyn_int_label_ref(), {
-            custom_clone_modifiers_wrapper(unwrap_ref(&mods))
-        }).m;
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            elytron_lib::call_sandbox_closure_timing(|u| {
+                custom_clone_modifiers_wrapper(u)
+            }, unwrap_ref(&mods))
+            //custom_clone_modifiers_wrapper(unwrap_ref(&mods))
+        }).clone().m;
         ShortcutMatcher::new(KeyState::Down, /*key.clone()*/ k, /*mods*/ m)
             .shortcut(Modifiers::CONTROL | Modifiers::ALT, 'B', || {
                 self.adjust_horizontal_by_word(Direction::Backward, maybe_select);
@@ -1331,19 +1720,25 @@ impl<T: ClipboardProvider> TextInput<T> {
                 KeyReaction::RedrawSelection
             })
             .shortcut(CMD_OR_CONTROL, 'X', || {
-                if let Some(text) = self.get_selection_text() {
+                if let Some(text) = self.get_selection_text() { 
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
                     self.clipboard_provider.set_clipboard_contents(trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
                         unwrap(text)
-                    })/*text*/);
+                    }).clone()/*text*/);
                     self.delete_char(Direction::Backward);
                 }
                 KeyReaction::DispatchInput
             })
             .shortcut(CMD_OR_CONTROL, 'C', || {
                 if let Some(text) = self.get_selection_text() {
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
                     self.clipboard_provider.set_clipboard_contents(trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
                         unwrap(text)
-                    })/*text*/);
+                    }).clone()/*text*/);
                 }
                 KeyReaction::DispatchInput
             })
@@ -1419,24 +1814,43 @@ impl<T: ClipboardProvider> TextInput<T> {
                 KeyReaction::RedrawSelection
             })
             .otherwise(|| {
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let cond_wrapped = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, key.get_dyn_sec_label_ref(), key.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&key);
-                    let mut val = false;
-                    unchecked_operation(if let Key::Character(ref c) = unwrapped.k {
-                        val = true;
-                    });
-                    wrap(val)
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    wrap(elytron_lib::call_sandbox_closure(|a: ()| {
+                        if let Key::Character(ref c) = unwrapped.k {
+                            true
+                        } else {
+                            false
+                        }
+                    }, ()))
                 });
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let cond_unwrapped = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, key.get_dyn_sec_label_ref(), key.get_dyn_int_label_ref(), {
                     unwrap(cond_wrapped)
-                });
+                }).clone();
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let string_wrapped = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, key.get_dyn_sec_label_ref(), key.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&key);
-                    let mut s = std::string::String::from("");
-                    unchecked_operation(if let Key::Character(ref c) = unwrapped.k {
-                        s = c.as_str().into();
-                    });
-                    wrap(s)
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    wrap(elytron_lib::call_sandbox_closure(|a: ()| {
+                        if let Key::Character(ref c) = unwrapped.k {
+                            c.as_str().into()
+                        } else {
+                            std::string::String::from("")
+                        }
+                    }, ()))
                 });
                 if /*let Key::Character(ref c) = /*k*/ key*/ cond_unwrapped {
                     self.insert_secret_string(string_wrapped/*c.as_str()*/);
@@ -1455,10 +1869,22 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// Whether the content is empty.
     pub fn is_empty(&self) -> bool {
         self.lines.len() <= 1 && self.lines.get(0).map_or(true, |line| {
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, line.get_dyn_sec_label_ref(), line.get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(&line);
-                std::string::String::is_empty(DOMString::to_string_ref(&unwrapped))
-            })
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                std::string::String::is_empty(
+                    elytron_lib::call_sandbox_closure_timing(|u| {
+                        DOMString::to_string_ref(u)
+                    }, unwrapped)
+                    //DOMString::to_string_ref(&unwrapped)
+                )
+            }).clone()
         } /*line.is_empty()*/)
     }
 
@@ -1467,10 +1893,20 @@ impl<T: ClipboardProvider> TextInput<T> {
         self.lines
             .iter()
             .fold(UTF8Bytes::zero(), |m, l| {
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let l_len_utf8 = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, l.get_dyn_sec_label_ref(), l.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&l);
-                    len_utf8_str(&DOMString::to_str_ref(unwrapped))
-                });
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| {
+                        len_utf8_str(&DOMString::to_str_ref(u))
+                    }, unwrapped)
+                    //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+                }).clone();
                 m + /*l.len_utf8()*/ l_len_utf8 + UTF8Bytes::one() // + 1 for the '\n'
             })
             .saturating_sub(UTF8Bytes::one())
@@ -1479,14 +1915,30 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// The total number of code units required to encode the content in utf16.
     pub fn utf16_len(&self) -> UTF16CodeUnits {
         //panic!("Panic2");
+        //Elytron: Not called
         self.lines
             .iter()
             .fold(UTF16CodeUnits::zero(), |m, l| {
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let len_chars_map = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, l.get_dyn_sec_label_ref(), l.get_dyn_int_label_ref(), {
-                    let unwrapped_chars = core::primitive::str::chars(std::string::String::as_str(DOMString::to_string_ref(unwrap_ref(l))));
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    let unwrapped_chars = core::primitive::str::chars(std::string::String::as_str(
+                        elytron_lib::call_sandbox_closure_timing(|u| { DOMString::to_string_ref(u) }, unwrap_ref(l))
+                    ));
                     //let mapped = std::str::Chars::map(unwrapped_chars, core::primitive::char::len_utf16);
-                    unchecked_operation(unwrapped_chars.map(core::primitive::char::len_utf16).sum::<usize>() + 1)
-                });
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure(|a: ()| {
+                        unwrapped_chars.map(core::primitive::char::len_utf16).sum::<usize>() + 1
+                    }, ())
+                }).clone();
                 m + UTF16CodeUnits{value: len_chars_map /*l.chars().map(char::len_utf16).sum::<usize>() + 1*/}
                 // + 1 for the '\n'
             })
@@ -1496,10 +1948,19 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// The length of the content in Unicode code points.
     pub fn char_count(&self) -> usize {
         self.lines.iter().fold(0, |m, l| {
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             let l_chars_count = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, l.get_dyn_sec_label_ref(), l.get_dyn_int_label_ref(), {
-                let unwrapped_chars = core::primitive::str::chars(std::string::String::as_str(DOMString::to_string_ref(unwrap_ref(l))));
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let unwrapped_chars = core::primitive::str::chars(std::string::String::as_str(
+                    elytron_lib::call_sandbox_closure_timing(|u| { DOMString::to_string_ref(u) }, unwrap_ref(l))
+                ));
                 std::str::Chars::count(unwrapped_chars)
-            });
+            }).clone();
             m + l_chars_count /*l.chars().count()*/ + 1 // + 1 for the '\n'
         }) - 1
     }
@@ -1507,11 +1968,18 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// Get the current contents of the text input. Multiple lines are joined by \n.
     pub fn get_content(&self) -> ServoSecureDynamic<DOMString> {
         //panic!("Panic3");
+        //Elytron: Not called
         if (self.lines.is_empty())
         {
             //TODO: use domain information from element owning this textinput
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
-                wrap(DOMString::from_string(std::string::String::from("")))
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(std::string::String::from("")) }, ()))
             })
         }
         else
@@ -1519,17 +1987,32 @@ impl<T: ClipboardProvider> TextInput<T> {
             let sec_label = self.lines[0].get_dyn_sec_label();
             let int_label = self.lines[0].get_dyn_int_label_ref();
             let lines_ref = &self.lines;
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &sec_label, &int_label, {
                 let mut content = std::string::String::from("");
-                for (i, line) in elytron_lib::call_sandbox_closure(|lr| {std::iter::Iterator::enumerate(lr.iter())}, lines_ref)/*unchecked_operation(std::iter::Iterator::enumerate(lines_ref.iter()))*/ {
-                    std::string::String::push_str(&mut content, DOMString::to_str_ref(unwrap_ref(line)));
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                for (i, line) in elytron_lib::call_sandbox_closure_timing(|lr| {std::iter::Iterator::enumerate(lr.iter())}, lines_ref) {
+                    let unwrapped = unwrap_ref(line);
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    std::string::String::push_str(&mut content, elytron_lib::call_sandbox_closure_timing(|u: ()| { DOMString::to_str_ref(unwrapped) }, ()));
                     //content.push_str(unwrap_ref(&line));
                     if i < std::vec::Vec::len(lines_ref) - 1 {
                         std::string::String::push(&mut content, '\n');
                         //content.push('\n');
                     }
                 }
-                wrap(DOMString::from_string(content))
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(content) }, ()))
             })
         }
     }
@@ -1543,32 +2026,54 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// Set the current contents of the text input. If this is control supports multiple lines,
     /// any \n encountered will be stripped and force a new logical line.
     pub fn set_content(&mut self, content: SecureValue<DOMString, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>>) {
-        //Elytron called in tests; breaks at the collect
+        //Elytron: Called in tests; breaks at the collect
         //panic!("Panic4");
         self.lines = if self.multiline {
             //let custom_closure = |s| secret_structs::untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { wrap(DOMString::from_string(core::primitive::str::to_string(s))) });
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             let result = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), {
                 let unwrapped = unwrap_ref(&content);
-                let replaced: String = core::primitive::str::replace(DOMString::to_str_ref(unwrapped), "\r\n", "\n");
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let replaced: String = core::primitive::str::replace(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped) }, ()), "\r\n", "\n");
                 let split = core::primitive::str::split(&replaced, |c| c == '\n' || c == '\r');
                 //elytron failed conversion. Stack trace is just a segfault from the call closure instruction. 
-                //let collected = unchecked_operation(split.map(|s| untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { wrap(DOMString::from_string(core::primitive::str::to_string(s))) })).collect());
-                let collected = elytron_lib::call_sandbox_closure(
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let collected: Vec<_> = elytron_lib::call_sandbox_closure_timing(
                     |sp| {
                         sp.map(|s| untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), { 
+                            unchecked_operation(
+                                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                                elytron_lib::sandbox_escape_hatch(|a: ()| {
+                                    println!("{}:{}", file!(), line!())
+                                }, ())
+                            );
                             wrap(
-                                DOMString::from_string(
-                                    core::primitive::str::to_string(s)
-                                )
+                                elytron_lib::call_sandbox_closure_timing(|a: ()| { 
+                                    DOMString::from_string(
+                                        core::primitive::str::to_string(s)
+                                    )
+                                }, ())
                             ) 
                         })).collect()
                     }, split
                 );
                 wrap(collected)
             });
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, result.get_dyn_sec_label_ref(), result.get_dyn_int_label_ref(), {
                 unwrap(result)
-            })
+            }).clone()
             // https://html.spec.whatwg.org/multipage/#textarea-line-break-normalisation-transformation
             /*content
                 .replace("\r\n", "\n")
@@ -1595,7 +2100,12 @@ impl<T: ClipboardProvider> TextInput<T> {
             .enumerate()
             .fold(UTF8Bytes::zero(), |acc, (i, val)| {
                 if i < text_point.line {
-                    acc + trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, val.get_dyn_sec_label_ref(), val.get_dyn_int_label_ref(), {let unwrapped = unwrap_ref(&val); len_utf8_str(&DOMString::to_str_ref(unwrapped))}) + UTF8Bytes::one() // +1 for the \n
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!());
+                    acc + trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, val.get_dyn_sec_label_ref(), val.get_dyn_int_label_ref(), {let unwrapped = unwrap_ref(&val); elytron_lib::call_sandbox_closure_timing(|u| {len_utf8_str(&DOMString::to_str_ref(u))}, unwrapped)/*len_utf8_str(&DOMString::to_str_ref(unwrapped))*/}).clone() + UTF8Bytes::one() // +1 for the \n
                 } else {
                     acc
                 }
@@ -1613,7 +2123,12 @@ impl<T: ClipboardProvider> TextInput<T> {
             .enumerate()
             .fold(UTF8Bytes::zero(), |acc, (i, val)| {
                 if i != last_line_idx {
-                    let line_end = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, val.get_dyn_sec_label_ref(), val.get_dyn_int_label_ref(), {let unwrapped = unwrap_ref(&val); len_utf8_str(&DOMString::to_str_ref(unwrapped))});
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!());
+                    //ELYTRON: TIMING_FLAG
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!());
+                    let line_end = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, val.get_dyn_sec_label_ref(), val.get_dyn_int_label_ref(), {let unwrapped = unwrap_ref(&val); elytron_lib::call_sandbox_closure_timing(|u| {len_utf8_str(&DOMString::to_str_ref(u))}, unwrapped) /*len_utf8_str(&DOMString::to_str_ref(unwrapped))*/}).clone();
                     let new_acc = acc + line_end + UTF8Bytes::one();
                     if abs_point >= new_acc && index > line_end {
                         index = index.saturating_sub(line_end + UTF8Bytes::one());
@@ -1635,10 +2150,20 @@ impl<T: ClipboardProvider> TextInput<T> {
         let mut start = UTF8Bytes{value: start as usize};
         let mut end = UTF8Bytes{value: end as usize};
         let content = self.get_content();
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let text_end = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&content); 
-            len_utf8_str(&DOMString::to_str_ref(unwrapped))
-        })/*self.get_content().len_utf8()*/;
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            elytron_lib::call_sandbox_closure_timing(|u| {
+                len_utf8_str(&DOMString::to_str_ref(u))
+            }, unwrapped)
+            //len_utf8_str(&DOMString::to_str_ref(unwrapped))
+        }).clone()/*self.get_content().len_utf8()*/;
 
         if end > text_end {
             end = text_end;
@@ -1665,16 +2190,29 @@ impl<T: ClipboardProvider> TextInput<T> {
     /// Set the edit point index position based off of a given grapheme cluster offset
     pub fn set_edit_point_index(&mut self, index: usize) {
         let start = &self.lines[self.edit_point.line];
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let byte_offset = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, start.get_dyn_sec_label_ref(), start.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(start);
-            let graphemes = custom_graphemes(DOMString::to_str_ref(unwrapped), true);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            let graphemes = elytron_lib::call_sandbox_closure_timing(|a: ()| { custom_graphemes(DOMString::to_str_ref(unwrapped), true) }, ());
             let taken = custom_take_graphemes(graphemes, index);
-            let folded = custom_fold(taken, 0, |acc, x| acc + len_utf8_str(x).value);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            let folded = custom_fold(taken, 0, |acc, x| acc + /*len_utf8_str(x)*/elytron_lib::call_sandbox_closure_timing(|x2| {len_utf8_str(x2)}, x).value);
             wrap(folded)
         });
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         self.edit_point.index = UTF8Bytes{value: trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, byte_offset.get_dyn_sec_label_ref(), byte_offset.get_dyn_int_label_ref(), {
             unwrap(byte_offset)
-        })};
+        }).clone()};
 
         /*let byte_offset = self.lines[self.edit_point.line]
             .graphemes(true)

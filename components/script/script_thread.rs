@@ -3626,41 +3626,92 @@ impl ScriptThread {
                 let dynamic_sec_label = DynLabel::<Sec>::new_size_one(self.get_secrecy_tag_for_domain_impl(focused_element_domain));
                 let dynamic_sec_label_old = DynLabel::<Sec>::new_default();
                 let dynamic_int_label = DynLabel::<Int>::new_default();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let state: SecureValue<KeyStateWrapper, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>> = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
-                        wrap(custom_clone_key_state_wrapper(unwrap_ref(&key_event.state)))
-                });
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                            custom_clone_key_state_wrapper(u)
+                        }, unwrap_ref(&key_event.state)))
+                }).clone();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let key = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
-                        wrap(custom_clone_key_wrapper(unwrap_ref(&key_event.key)))
-                });
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                            custom_clone_key_wrapper(u)
+                        }, unwrap_ref(&key_event.key)))
+                }).clone();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let code = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
-                        wrap(custom_clone_code_wrapper(unwrap_ref(&key_event.code)))
-                });
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                            custom_clone_code_wrapper(u)
+                        }, unwrap_ref(&key_event.code)))
+                }).clone();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let location = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
-                        wrap(custom_clone_location_wrapper(unwrap_ref(&key_event.location)))
-                });
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                            custom_clone_location_wrapper(u)
+                        }, unwrap_ref(&key_event.location)))
+                }).clone();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let modifiers = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
-                        wrap(custom_clone_modifiers_wrapper(unwrap_ref(&key_event.modifiers)))
-                });
+                        unchecked_operation(
+                            #[cfg(feature = "servo_benchmarking_sandboxes")]
+                            println!("{}:{}", file!(), line!())
+                        );
+                        wrap(elytron_lib::call_sandbox_closure_timing(|u| {
+                            custom_clone_modifiers_wrapper(u)
+                        }, unwrap_ref(&key_event.modifiers)))
+                }).clone();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let repeat = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         wrap(*unwrap_ref(&key_event.repeat))
-                });
+                }).clone();
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
                 let is_composing = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         wrap(*unwrap_ref(&key_event.is_composing))
-                });
+                }).clone();
                 let key_event_dl = SecKeyboardEvent::<sec_lat::Label_Empty, int_lat::Label_All>{state, key, code, location, modifiers, repeat, is_composing};
                 document.dispatch_key_event(key_event_dl);
             },

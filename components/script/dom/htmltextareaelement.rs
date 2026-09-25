@@ -101,13 +101,27 @@ impl<'dom> LayoutDom<'dom, HTMLTextAreaElement> {
 impl LayoutHTMLTextAreaElementHelpers for LayoutDom<'_, HTMLTextAreaElement> {
     fn value_for_layout(self) -> String {
         let text = self.textinput_content();
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let boolean_test = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&text);
-            wrap(std::string::String::is_empty(DOMString::to_string_ref(unwrapped)))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(std::string::String::is_empty(
+                elytron_lib::call_sandbox_closure_timing(|u| {
+                    DOMString::to_string_ref(u)
+                }, unwrapped)
+                //DOMString::to_string_ref(unwrapped)
+            ))
         });
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         if trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, boolean_test.get_dyn_sec_label_ref(), boolean_test.get_dyn_int_label_ref(), {
             unwrap(boolean_test)
-        }) {
+        }).clone() {
             // FIXME(nox): Would be cool to not allocate a new string if the
             // placeholder is single line, but that's an unimportant detail.
             self.placeholder()
@@ -115,9 +129,12 @@ impl LayoutHTMLTextAreaElementHelpers for LayoutDom<'_, HTMLTextAreaElement> {
                 .replace("\r", "\n")
                 .into()
         } else {
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
                 unwrap(text)
-            }).into()
+            }).clone().into()
         }
     }
 
@@ -348,6 +365,8 @@ impl HTMLTextAreaElementMethods for HTMLTextAreaElement {
         let old_value = textinput.get_content();
 
         // Step 2
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let secnewval = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, old_value.get_dyn_sec_label_ref(), old_value.get_dyn_int_label_ref(), {
             wrap(value)
         });
@@ -358,14 +377,23 @@ impl HTMLTextAreaElementMethods for HTMLTextAreaElement {
 
         let new_value = textinput.get_content();
 
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let boolean_test = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, old_value.get_dyn_sec_label_ref(), old_value.get_dyn_int_label_ref(), {
             let unwrapped_old = unwrap_ref(&old_value);
             let unwrapped_new = unwrap_ref(&new_value);
-            wrap(DOMString::to_str_ref(unwrapped_old) != DOMString::to_str_ref(unwrapped_new))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped_old) != DOMString::to_str_ref(unwrapped_new) }, ()))
         });
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         if trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, boolean_test.get_dyn_sec_label_ref(), boolean_test.get_dyn_int_label_ref(), {
             unwrap(boolean_test)
-        }) {
+        }).clone() {
             // Step 4
             textinput.clear_selection_to_limit(Direction::Forward);
         }
@@ -479,6 +507,8 @@ impl HTMLTextAreaElement {
         let dynamic_sec_label = DynLabel::<Sec>::new_size_one(domain_tag);
         let dynamic_int_label = DynLabel::<Int>::new_default();
         let val = self.DefaultValue();
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let secdefval = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
             wrap(val)
         });

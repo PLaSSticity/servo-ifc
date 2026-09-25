@@ -1731,7 +1731,8 @@ impl Document {
 
     /// The entry point for all key processing for web content
     pub fn dispatch_key_event(&self, keyboard_event: SecKeyboardEvent<sec_lat::Label_Empty,int_lat::Label_All>) {
-        panic!("Panic5");
+        //panic!("Panic5");
+        //Elytron: Not called
         //Carapace: Massive overhaul of entire function
 
         let focused = self.get_focused_element();
@@ -1754,6 +1755,8 @@ impl Document {
         let r = &(keyboard_event.repeat);
         let i_c = &(keyboard_event.is_composing);
         let m = &(keyboard_event.modifiers);
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let secure_1 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &label_s, &label_i, {
             let unwrapped_state = unwrap_ref(s);
             let unwrapped_key = unwrap_ref(k);
@@ -1762,14 +1765,41 @@ impl Document {
             let unwrapped_repeat = unwrap_ref(r);
             let unwrapped_is_composing = unwrap_ref(i_c);
             let unwrapped_modifiers = unwrap_ref(m);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_unchecked")]
+                println!("{}:{}", file!(), line!())
+            );
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                {
+                    println!("{}:{}", file!(), line!());
+                    println!("{}:{}", file!(), line!());
+                    println!("{}:{}", file!(), line!());
+                    println!("{}:{}", file!(), line!())
+                }
+            );
             let result = SecurePart::<DOMString>::new(
-                DOMString::from_string(/*unchecked_operation(unwrapped_state.k.to_string())*/elytron_lib::call_sandbox_closure(|us| {us.k.to_string()}, unwrapped_state)) /*key_state_to_string(&unwrapped_state)*/,
-                custom_clone_key_wrapper(&unwrapped_key),
-                DOMString::from_string(unchecked_operation(unwrapped_code.c.to_string())) /*code_to_string(&unwrapped_code)*/,
+                elytron_lib::call_sandbox_closure_timing(
+                    |a: ()| {
+                        DOMString::from_string(unwrapped_state.k.to_string())
+                    }, ()
+                ) /*key_state_to_string(&unwrapped_state)*/,
+                //custom_clone_key_wrapper(&unwrapped_key),
+                elytron_lib::call_sandbox_closure_timing(|k| {
+                    custom_clone_key_wrapper(k)
+                }, &unwrapped_key),
+                elytron_lib::call_sandbox_closure_timing(
+                    |a: ()| {
+                        DOMString::from_string(unwrapped_code.c.to_string())
+                    }, ()
+                ) /*code_to_string(&unwrapped_code)*/,
                 unwrapped_location.l as u32,
                 *unwrapped_repeat,
                 *unwrapped_is_composing,
-                custom_clone_modifiers_wrapper(&unwrapped_modifiers),
+                elytron_lib::call_sandbox_closure_timing(|m| {
+                    custom_clone_modifiers_wrapper(m)
+                }, &unwrapped_modifiers),
+                //custom_clone_modifiers_wrapper(&unwrapped_modifiers),
                 0,
                 unchecked_operation(unwrapped_key.k.legacy_keycode())
             );
@@ -1784,6 +1814,8 @@ impl Document {
         let i_c = &(keyboard_event.is_composing);
         let m = &(keyboard_event.modifiers);
         let cancelable_type = DOMString::from_string(String::from("keypress"));
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let secure_2 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &label_s, &label_i, {
             let unwrapped_state = unwrap_ref(s);
             let unwrapped_key = unwrap_ref(k);
@@ -1792,14 +1824,36 @@ impl Document {
             let unwrapped_repeat = unwrap_ref(r);
             let unwrapped_is_composing = unwrap_ref(i_c);
             let unwrapped_modifiers = unwrap_ref(m);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_unchecked")]
+                println!("{}:{}", file!(), line!())
+            );
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                {
+                    println!("{}:{}", file!(), line!());
+                    println!("{}:{}", file!(), line!());
+                    println!("{}:{}", file!(), line!())
+                }
+            );
             let result: SecurePart<DOMString> = SecurePart{
                 type_: cancelable_type,
-                key: custom_clone_key_wrapper(&unwrapped_key),
-                code: DOMString::from_string(unchecked_operation(unwrapped_code.c.to_string())),
+                key: elytron_lib::call_sandbox_closure_timing(|k| {
+                    custom_clone_key_wrapper(k)
+                }, &unwrapped_key),
+                //key: custom_clone_key_wrapper(&unwrapped_key),
+                code: elytron_lib::call_sandbox_closure_timing(
+                    |a: ()| {
+                        DOMString::from_string(unwrapped_code.c.to_string())
+                    }, ()
+                ),
                 location: unwrapped_location.l as u32,
                 repeat: *unwrapped_repeat,
                 is_composing: *unwrapped_is_composing,
-                modifiers: custom_clone_modifiers_wrapper(&unwrapped_modifiers),
+                modifiers: elytron_lib::call_sandbox_closure_timing(|m2| {
+                    custom_clone_modifiers_wrapper(m2)
+                }, &unwrapped_modifiers),
+                //modifiers: custom_clone_modifiers_wrapper(&unwrapped_modifiers),
                 char_code: unchecked_operation(unwrapped_key.k.legacy_charcode()),
                 key_code: 0
             };
@@ -1833,19 +1887,28 @@ impl Document {
         let s = &keyboard_event.state;
         let k = &keyboard_event.key;
         let i_s = &keyboard_event.is_composing;
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let cond = untrusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
             let unwrapped_state = unwrap_ref(s);
             let unwrapped_key = unwrap_ref(k);
             let unwrapped_is_composing = unwrap_ref(i_s);
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_unchecked")]
+                println!("{}:{}", file!(), line!())
+            );
             wrap(unchecked_operation(unwrapped_state.k == KeyState::Down) /*is_down(unwrapped_state)*/ &&
             is_character_value_key(unwrapped_key) &&
             !unwrapped_is_composing &&
             is_not_prevented)
         });
 
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let conditional = trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
             unwrap(cond)
-        });
+        }).clone();
         // https://w3c.github.io/uievents/#keys-cancelable-keys
         if conditional //Carapace: Computed conditional in above block and used it here. 
         {
@@ -1889,15 +1952,28 @@ impl Document {
             let k = &keyboard_event.key;
             let c = &keyboard_event.code;
             let s = &keyboard_event.state;
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             let cond = untrusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
                 let unwrapped_key = unwrap_ref(k);
                 let unwrapped_code = unwrap_ref(c);
                 let unwrapped_state = unwrap_ref(s);
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_unchecked")]
+                    {
+                        println!("{}:{}", file!(), line!());
+                        println!("{}:{}", file!(), line!());
+                        println!("{}:{}", file!(), line!())
+                    }
+                );
                 wrap((unchecked_operation(unwrapped_key.k == Key::Enter) /*(is_enter(unwrapped_key)*/ || unchecked_operation(unwrapped_code.c == Code::Space) /*is_space(unwrapped_code)*/) && unchecked_operation(unwrapped_state.k == KeyState::Up) /*is_up(unwrapped_state)*/)
             });
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
             let conditional2 = trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
                 unwrap(cond)
-            });
+            }).clone();
             if conditional2 //Carapace: Computed conditional in above block and used it here
             {
                 if let Some(elem) = target.downcast::<Element>() {
@@ -2984,6 +3060,10 @@ impl Document {
 //Carapace: Tagged this function as side_effect_free_attr
 #[side_effect_free_attr]
 fn is_character_value_key(key: &KeyWrapper) -> bool {
+    unchecked_operation(
+        #[cfg(feature = "servo_benchmarking_funcs")]
+        println!("{}:{}", file!(), line!())
+    );
     match key.k {
         Key::Character(_) | Key::Enter => true,
         _ => false,

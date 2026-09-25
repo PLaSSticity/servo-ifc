@@ -98,9 +98,12 @@ impl UIEvent {
             return;
         }
         //Carapace: DECLASSIFY
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        println!("{}:{}", file!(), line!());
+        //ELYTRON: TIMING_FLAG
         let new_type_: DOMString = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, type_.get_dyn_sec_label_ref(), type_.get_dyn_int_label_ref(), {
             unwrap(type_)
-        });
+        }).clone();
         event.init_event(Atom::from(new_type_), can_bubble, cancelable);
         //event.init_event(Atom::from(type_), can_bubble, cancelable);
         self.view.set(view);

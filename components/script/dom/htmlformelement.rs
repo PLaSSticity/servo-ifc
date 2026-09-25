@@ -669,6 +669,8 @@ impl HTMLFormElement {
     // https://html.spec.whatwg.org/multipage/#text/plain-encoding-algorithm
     fn encode_plaintext(&self, form_data: &mut Vec<FormDatum>) -> ServoSecureDynamic<String> {
         // Step 1
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let mut result = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
             wrap(std::string::String::new())
         });
@@ -678,12 +680,16 @@ impl HTMLFormElement {
             let value = match &entry.value {
                 FormDatumValue::File(f) => {
                     let s = f.name().clone();
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
                         wrap(s)
                     })
                 },
                 FormDatumValue::String(s) => {
                     let s2 = s.clone();
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!());
                     untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
                         wrap(s2)
                     })
@@ -691,6 +697,8 @@ impl HTMLFormElement {
                 FormDatumValue::SecretString(ss) => ss.clone(),
             };
             let entname = entry.name.to_string();
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_no_return_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All,
             value.get_dyn_sec_label_ref(), value.get_dyn_int_label_ref(), {
                 let r = unwrap_mut_ref(&mut result);
@@ -699,7 +707,11 @@ impl HTMLFormElement {
                 //r.push_str(&format!("{}={}\r\n", entry.name, v));
                 std::string::String::push_str(r, std::string::String::as_str(&entname));
                 std::string::String::push(r, '=');
-                std::string::String::push_str(r, DOMString::to_str_ref(v));
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                std::string::String::push_str(r, elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(v) }, ()));
                 std::string::String::push_str(r, "\r\n");
             });
         }
@@ -951,7 +963,10 @@ impl HTMLFormElement {
                     .headers
                     .typed_insert(ContentType::from(mime::TEXT_PLAIN));
                 let encsec = self.encode_plaintext(form_data);
-                MaybeSecret::Secret(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, encsec.get_dyn_sec_label_ref(), encsec.get_dyn_int_label_ref(), { wrap(std::string::String::into_bytes(unwrap(encsec))) }))
+                MaybeSecret::Secret({
+                    #[cfg(feature = "servo_benchmarking_blocks")]
+                    println!("{}:{}", file!(), line!()); 
+                    untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, encsec.get_dyn_sec_label_ref(), encsec.get_dyn_int_label_ref(), { wrap(std::string::String::into_bytes(unwrap(encsec))) })})
             },
         };
 
@@ -966,7 +981,12 @@ impl HTMLFormElement {
 
         let unwrapped_bytes = match bytes {
             MaybeSecret::NonSecret(b) => b,
-            MaybeSecret::Secret(sb) => trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(sb) })
+            MaybeSecret::Secret(sb) => {
+                #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(sb) }).clone()
+            }
         };
 
         let request_body = unwrapped_bytes
@@ -995,7 +1015,11 @@ impl HTMLFormElement {
         let declassified_pairs = pairs.map(|(k, v)| {
             match v {
                 MaybeSecret::NonSecret(vs) => (k, vs),
-                MaybeSecret::Secret(svs) => (k, trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(svs) }))
+                MaybeSecret::Secret(svs) => (k, {
+                    //ELYTRON: TIMING_FLAG
+                    #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+                    println!("{}:{}", file!(), line!()); 
+                    trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(svs) }).clone()})
             }
         });
         url.as_mut_url()
@@ -1218,7 +1242,7 @@ impl HTMLFormElement {
         submitter: Option<FormSubmitter>,
         encoding: Option<&'static Encoding>,
     ) -> Option<Vec<FormDatum>> {
-        #[side_effect_free_attr]
+        //#[side_effect_free_attr]
         fn clean_crlf(s: &str) -> String {
             // Step 4
             let mut buf = std::string::String::from("");
@@ -1250,9 +1274,22 @@ impl HTMLFormElement {
             buf
         }
         fn clean_crlf_sec(s: &ServoSecureDynamic<DOMString>) -> ServoSecureDynamic<DOMString> {
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, s.get_dyn_sec_label_ref(), s.get_dyn_int_label_ref(), {
-                let ss : &str = DOMString::to_str_ref(unwrap_ref(s));
-                wrap(DOMString::from_string(clean_crlf(ss)))
+                let unwrapped = unwrap_ref(s);
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                let ss : &str = elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped) }, ());
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| {
+                    DOMString::from_string(clean_crlf(ss))
+                }, ()))
             })
         }
 
@@ -1405,13 +1442,36 @@ impl FormDatum {
             FormDatumValue::File(ref f) => MaybeSecret::NonSecret(String::from(f.name().clone())),
             FormDatumValue::String(ref s) => MaybeSecret::NonSecret(String::from(s.clone())),
             FormDatumValue::SecretString(ref ss) => MaybeSecret::Secret(
+                {#[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All,
                 ss.get_dyn_sec_label_ref(), ss.get_dyn_int_label_ref(), {
                     let s = unwrap_ref(ss);
-                    let sc = DOMString::from_string(std::string::String::clone(DOMString::to_string_ref(&s)));
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        {
+                            println!("{}:{}", file!(), line!());
+                            println!("{}:{}", file!(), line!())
+                        }
+                    );
+                    let sc = elytron_lib::call_sandbox_closure_timing(|a: ()| {
+                        DOMString::from_string(std::string::String::clone(
+                            elytron_lib::call_sandbox_closure_timing(|a| { DOMString::to_string_ref(&s) }, ())
+                        ))
+                    }, ());
+                    /*DOMString::from_string(std::string::String::clone(
+                        elytron_lib::call_sandbox_closure_timing(|s2| {
+                            DOMString::to_string_ref(s2)
+                        }, &s)
+                        //DOMString::to_string_ref(&s)
+                    ));*/
                     //let sc = std::clone::Clone::clone(s);
-                    wrap(DOMString::to_owned(sc))
-                })
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_owned(sc) }, ()))
+                })}
             )
         }
     }
@@ -1849,12 +1909,19 @@ pub fn encode_multipart_form_data(
             FormDatumValue::SecretString(ref ss) =>
             {
                 let content_disposition = format!("form-data; name=\"{}\"", entry.name);
+                #[cfg(feature = "servo_benchmarking_blocks")]
+                println!("{}:{}", file!(), line!());
                 let bytes =
                 untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, ss.get_dyn_sec_label_ref(), ss.get_dyn_int_label_ref(), {
                     let mut r = std::string::String::from("Content-Dispopsition: ");
                     std::string::String::push_str(&mut r, &content_disposition);
                     std::string::String::push_str(&mut r, "\r\n\r\n");
-                    std::string::String::push_str(&mut r, DOMString::to_str_ref(unwrap_ref(ss)));
+                    let unwrapped = unwrap_ref(ss);
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    std::string::String::push_str(&mut r, elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped) }, ()));
                     wrap(std::string::String::into_bytes(r))
                 });
                 result = result.concat(MaybeSecret::Secret(bytes));

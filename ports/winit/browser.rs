@@ -103,28 +103,73 @@ where
     /// Handle key events before sending them to Servo.
     fn handle_key_from_window(&mut self, key_event: SecKeyboardEvent<sec_lat::Label_A, int_lat::Label_All>) {
         //Carapace: DECLASSIFY
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        {
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+        }
         let k2 = KeyboardEvent {
             state: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.state.get_dyn_sec_label_ref(), key_event.state.get_dyn_int_label_ref(), {
-                custom_clone_key_state_wrapper(unwrap_ref(&key_event.state))
-            }).k,
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_key_state_wrapper(u) }, unwrap_ref(&key_event.state))
+            }).clone().k,
             key: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.key.get_dyn_sec_label_ref(), key_event.key.get_dyn_int_label_ref(), {
-                custom_clone_key_wrapper(unwrap_ref(&key_event.key))
-            }).k,
+                /*let k3 = unwrap_ref(&key_event.key);
+                elytron_lib::call_sandbox_closure_timing(|k4| {
+                    custom_clone_key_wrapper(k4)
+                }, k3)*/
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_key_wrapper(u) }, unwrap_ref(&key_event.key))
+            }).clone().k,
             code: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.code.get_dyn_sec_label_ref(), key_event.code.get_dyn_int_label_ref(), {
-                custom_clone_code_wrapper(unwrap_ref(&key_event.code))
-            }).c,
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_code_wrapper(u) }, unwrap_ref(&key_event.code))
+            }).clone().c,
             location: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.location.get_dyn_sec_label_ref(), key_event.location.get_dyn_int_label_ref(), {
-                custom_clone_location_wrapper(unwrap_ref(&key_event.location))
-            }).l,
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_location_wrapper(u) }, unwrap_ref(&key_event.location))
+            }).clone().l,
             modifiers: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.modifiers.get_dyn_sec_label_ref(), key_event.modifiers.get_dyn_int_label_ref(), {
-                custom_clone_modifiers_wrapper(unwrap_ref(&key_event.modifiers))
-            }).m,
+                /*let m = unwrap_ref(&key_event.modifiers);
+                elytron_lib::call_sandbox_closure_timing(|m2| {
+                    custom_clone_modifiers_wrapper(m2)
+                }, m)*/
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_modifiers_wrapper(u) }, unwrap_ref(&key_event.modifiers))
+            }).clone().m,
             repeat: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.repeat.get_dyn_sec_label_ref(), key_event.repeat.get_dyn_int_label_ref(), {
                 *unwrap_ref(&key_event.repeat)
-            }),
+            }).clone(),
             is_composing: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.is_composing.get_dyn_sec_label_ref(), key_event.is_composing.get_dyn_int_label_ref(), {
                 *unwrap_ref(&key_event.is_composing)
-            }),
+            }).clone(),
         };
         ShortcutMatcher::from_event(/*key_event*/k2.clone())
             .shortcut(CMD_OR_CONTROL, 'R', || {
@@ -213,28 +258,73 @@ where
     fn platform_handle_key(&mut self, key_event: SecKeyboardEvent<sec_lat::Label_A, int_lat::Label_All> /*WindowEvent::Keyboard(key_event)*/) {
         if let Some(id) = self.browser_id {
             //Carapace: DECLASSIFY
+            #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))] 
+            {
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+                println!("{}:{}", file!(), line!());
+                //ELYTRON: TIMING_FLAG
+            }
             let k2 = KeyboardEvent {
                 state: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.state.get_dyn_sec_label_ref(), key_event.state.get_dyn_int_label_ref(), {
-                    custom_clone_key_state_wrapper(unwrap_ref(&key_event.state))
-                }).k,
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_key_state_wrapper(u) }, unwrap_ref(&key_event.state))
+                }).clone().k,
                 key: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.key.get_dyn_sec_label_ref(), key_event.key.get_dyn_int_label_ref(), {
-                    custom_clone_key_wrapper(unwrap_ref(&key_event.key))
-                }).k,
+                    /*let k3 = unwrap_ref(&key_event.key);
+                    elytron_lib::call_sandbox_closure_timing(|k4| {
+                        custom_clone_key_wrapper(k4)
+                    }, k3)*/
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_key_wrapper(u) }, unwrap_ref(&key_event.key))
+                }).clone().k,
                 code: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.code.get_dyn_sec_label_ref(), key_event.code.get_dyn_int_label_ref(), {
-                    custom_clone_code_wrapper(unwrap_ref(&key_event.code))
-                }).c,
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_code_wrapper(u) }, unwrap_ref(&key_event.code))
+                }).clone().c,
                 location: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.location.get_dyn_sec_label_ref(), key_event.location.get_dyn_int_label_ref(), {
-                    custom_clone_location_wrapper(unwrap_ref(&key_event.location))
-                }).l,
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_location_wrapper(u) }, unwrap_ref(&key_event.location))
+                }).clone().l,
                 modifiers: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.modifiers.get_dyn_sec_label_ref(), key_event.modifiers.get_dyn_int_label_ref(), {
-                    custom_clone_modifiers_wrapper(unwrap_ref(&key_event.modifiers))
-                }).m,
+                    /*let m = unwrap_ref(&key_event.modifiers);
+                    elytron_lib::call_sandbox_closure_timing(|m2| {
+                        custom_clone_modifiers_wrapper(m2)
+                    }, m)*/
+                    unchecked_operation(
+                        #[cfg(feature = "servo_benchmarking_sandboxes")]
+                        println!("{}:{}", file!(), line!())
+                    );
+                    elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_modifiers_wrapper(u) }, unwrap_ref(&key_event.modifiers))
+                }).clone().m,
                 repeat: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.repeat.get_dyn_sec_label_ref(), key_event.repeat.get_dyn_int_label_ref(), {
                     *unwrap_ref(&key_event.repeat)
-                }),
+                }).clone(),
                 is_composing: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, key_event.is_composing.get_dyn_sec_label_ref(), key_event.is_composing.get_dyn_int_label_ref(), {
                     *unwrap_ref(&key_event.is_composing)
-                }),
+                }).clone(),
             };
             if let Some(event) = ShortcutMatcher::from_event(k2.clone())
                 .shortcut(CMD_OR_CONTROL, '[', || {
@@ -256,28 +346,73 @@ where
     /// Handle key events after they have been handled by Servo.
     fn handle_key_from_servo(&mut self, _: Option<BrowserId>, event: SecKeyboardEvent<sec_lat::Label_A, int_lat::Label_All>) {
         //Carapace: DECLASSIFY
+        #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
+        {
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+            println!("{}:{}", file!(), line!());
+            //ELYTRON: TIMING_FLAG
+        }
         let e2 = KeyboardEvent {
             state: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.state.get_dyn_sec_label_ref(), event.state.get_dyn_int_label_ref(), {
-                custom_clone_key_state_wrapper(unwrap_ref(&event.state))
-            }).k,
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_key_state_wrapper(u) }, unwrap_ref(&event.state))
+            }).clone().k,
             key: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.key.get_dyn_sec_label_ref(), event.key.get_dyn_int_label_ref(), {
-                custom_clone_key_wrapper(unwrap_ref(&event.key))
-            }).k,
+                /*let k2 = unwrap_ref(&event.key);
+                elytron_lib::call_sandbox_closure_timing(|k3| {
+                    custom_clone_key_wrapper(k3)
+                }, k2)*/
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_key_wrapper(u) }, unwrap_ref(&event.key))
+            }).clone().k,
             code: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.code.get_dyn_sec_label_ref(), event.code.get_dyn_int_label_ref(), {
-                custom_clone_code_wrapper(unwrap_ref(&event.code))
-            }).c,
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_code_wrapper(u) }, unwrap_ref(&event.code))
+            }).clone().c,
             location: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.location.get_dyn_sec_label_ref(), event.location.get_dyn_int_label_ref(), {
-                custom_clone_location_wrapper(unwrap_ref(&event.location))
-            }).l,
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_location_wrapper(u) }, unwrap_ref(&event.location))
+            }).clone().l,
             modifiers: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.modifiers.get_dyn_sec_label_ref(), event.modifiers.get_dyn_int_label_ref(), {
-                custom_clone_modifiers_wrapper(unwrap_ref(&event.modifiers))
-            }).m,
+                /*let m = unwrap_ref(&event.modifiers);
+                elytron_lib::call_sandbox_closure_timing(|m2| {
+                    custom_clone_modifiers_wrapper(m2)
+                }, m)*/
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                elytron_lib::call_sandbox_closure_timing(|u| { custom_clone_modifiers_wrapper(u) }, unwrap_ref(&event.modifiers))
+            }).clone().m,
             repeat: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.repeat.get_dyn_sec_label_ref(), event.repeat.get_dyn_int_label_ref(), {
                 *unwrap_ref(&event.repeat)
-            }),
+            }).clone(),
             is_composing: trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, event.is_composing.get_dyn_sec_label_ref(), event.is_composing.get_dyn_int_label_ref(), {
                 *unwrap_ref(&event.is_composing)
-            }),
+            }).clone(),
         };
         ShortcutMatcher::from_event(e2)
             .shortcut(CMD_OR_CONTROL, '=', || {

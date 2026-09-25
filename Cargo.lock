@@ -5674,6 +5674,7 @@ dependencies = [
 name = "secret_structs"
 version = "0.1.0"
 dependencies = [
+ "elytron_lib",
  "glam",
  "libc",
  "secret_macros",

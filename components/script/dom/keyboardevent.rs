@@ -63,14 +63,30 @@ pub struct Secure2 {
 
 impl KeyboardEvent {
     fn new_inherited() -> KeyboardEvent {
+        #[cfg(feature = "servo_benchmarking_blocks")] {
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+        }
+        #[cfg(feature = "servo_benchmarking_sandboxes")]
+        {
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+        }
         KeyboardEvent {
             uievent: UIEvent::new_inherited(),
-            key: DomRefCell::new(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { wrap(DOMString::new()) })),
+            key: DomRefCell::new(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::new() }, ())) })),
             typed_key: DomRefCell::new({
                 let k2 = KeyWrapper{k: Key::Unidentified}; 
                 untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { wrap(k2) })
             }),
-            code: DomRefCell::new(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { wrap(DOMString::new()) })),
+            code: DomRefCell::new(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::new() }, ())) })),
             location: DomRefCell::new(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { wrap(0) })),
             modifiers: DomRefCell::new({
                 let m2 = ModifiersWrapper{m: Modifiers::empty()}; 
@@ -104,41 +120,88 @@ impl KeyboardEvent {
         //key_code: u32, //this
         secure: StaticDynamicAll<SecurePart<DOMString>,sec_lat::Label_Empty,int_lat::Label_All,DynLabel<Sec>,DynLabel<Int>>
     ) -> DomRoot<KeyboardEvent> { 
-
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let type_ = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
             //DOMString::from_string(std::string::String::clone(DOMString::to_string_ref(&unwrapped.type)))
-            wrap(DOMString::from_string(std::string::String::clone(DOMString::to_string_ref(&unwrapped.type_))))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| {
+                DOMString::from_string(std::string::String::clone(
+                    DOMString::to_string_ref(&unwrapped.type_)
+                ))
+            }, ()))
             //wrap(std::clone::Clone::clone(&unwrapped.type_))
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let key: ServoSecureDynamic<KeyWrapper> = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped: &SecurePart<DOMString> = unwrap_ref(&secure);
-            wrap(custom_clone_key_wrapper(&unwrapped.key))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|k| {
+                custom_clone_key_wrapper(k)
+            }, &unwrapped.key)
+                /*custom_clone_key_wrapper(&unwrapped.key)*/)
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let code = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
-            wrap(DOMString::from_string(std::string::String::clone(DOMString::to_string_ref(&unwrapped.code))))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| {
+                DOMString::from_string(std::string::String::clone(
+                    DOMString::to_string_ref(&unwrapped.code)
+                ))
+            }, ()))
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let location = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
             wrap(unwrapped.location)
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let repeat = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
             wrap(unwrapped.repeat)
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let is_composing = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
             wrap(unwrapped.is_composing)
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let modifiers = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
-            wrap(custom_clone_modifiers_wrapper(&unwrapped.modifiers))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|m2| {
+                custom_clone_modifiers_wrapper(m2)
+            }, &unwrapped.modifiers)
+                /*custom_clone_modifiers_wrapper(&unwrapped.modifiers)*/)
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let char_code = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
             wrap(unwrapped.char_code)
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let key_code = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped = unwrap_ref(&secure);
             wrap(unwrapped.key_code)
@@ -153,10 +216,22 @@ impl KeyboardEvent {
             };
             wrap(result);
         });*/
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let key_to_string: ServoSecureDynamic<DOMString> = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, secure.get_dyn_sec_label_ref(), secure.get_dyn_int_label_ref(), {
             let unwrapped_s: &SecurePart<DOMString> = unwrap_ref(&secure);
-            let a = keyboard_wrapper::to_string(&unwrapped_s.key);
-            wrap(DOMString::from_string(a))
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            let a = elytron_lib::call_sandbox_closure_timing(|u: ()| { keyboard_wrapper::to_string(&unwrapped_s.key) }, ());
+            unchecked_operation(
+                #[cfg(feature = "servo_benchmarking_sandboxes")]
+                println!("{}:{}", file!(), line!())
+            );
+            wrap(elytron_lib::call_sandbox_closure_timing(|u: ()| {
+                DOMString::from_string(a)
+            }, ()))
         });
         let ev = KeyboardEvent::new_uninitialized(window);
         ev.InitKeyboardEvent2(
@@ -208,6 +283,8 @@ impl KeyboardEvent {
         };
         let s: DynLabel<Sec> = DynLabel::<Sec>::new_default();
         let i: DynLabel<Int> = DynLabel::<Int>::new_default();
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         let secure_1 = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &s, &i,  {
             wrap(result)
         });
@@ -229,6 +306,8 @@ impl KeyboardEvent {
             //0,
         );
         let s = DOMString::from_string(init.key.clone().to_string());
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         *event.key.borrow_mut() = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { 
             wrap(s) 
         });
@@ -286,12 +365,18 @@ impl KeyboardEventMethods for KeyboardEvent {
         self.upcast::<UIEvent>()
         .InitUIEvent(type_arg, can_bubble_arg, cancelable_arg, view_arg, 0);
         let ka = DOMString::from_string(key_arg.to_string());
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         *self.key.borrow_mut() = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { 
             wrap(ka) 
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         *self.location.borrow_mut() = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { 
             wrap(location_arg) 
         });
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        println!("{}:{}", file!(), line!());
         *self.repeat.borrow_mut() = untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), { 
             wrap(repeat) 
         });

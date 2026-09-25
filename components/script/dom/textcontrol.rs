@@ -216,8 +216,14 @@ impl<'a, E: TextControlElement> TextControlSelection<'a, E> {
             // Steps 9-10
             textinput.set_selection_range(start, end, SelectionDirection::None);
             let r: String = (*replacement).to_string();
+            #[cfg(feature = "servo_benchmarking_blocks")]
+            println!("{}:{}", file!(), line!());
             textinput.replace_selection(untrusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, DynField::<Sec>::generate_dynamic_label(&()), DynField::<Int>::generate_dynamic_label(&()), {
-                wrap(DOMString::from_string(r))
+                unchecked_operation(
+                    #[cfg(feature = "servo_benchmarking_sandboxes")]
+                    println!("{}:{}", file!(), line!())
+                );
+                wrap(elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::from_string(r) }, ()))
             }) /*replacement*/);
         }
 

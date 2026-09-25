@@ -2,6 +2,8 @@
 #![feature(negative_impls)]
 
 
+use std::println;
+
 use keyboard_types::KeyboardEvent;
 use secret_macros::*;
 use secret_structs::integrity_lattice as int_lat;
@@ -49,6 +51,16 @@ impl<L1, L2> SecKeyboardEvent<L1, L2> where L1: secret_structs::ternary_lattice:
         let mw = ModifiersWrapper{m: ke.modifiers};
         let repeat = ke.repeat;
         let is_composing = ke.is_composing;
+        #[cfg(feature = "servo_benchmarking_blocks")]
+        {
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+            println!("{}:{}", file!(), line!());
+        }
         SecKeyboardEvent {
             state: untrusted_secure_block_dynamic_all!(L1, L2, &sl, &il, { wrap(kstw) }),
             key: untrusted_secure_block_dynamic_all!(L1, L2, &sl, &il, { wrap(kw) }),
@@ -89,7 +101,7 @@ pub struct KeyWrapper {
     pub k: Key,
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn to_string(k: &KeyWrapper) -> String {
     match k.k {
         Key::Character(ref s) => std::string::String::from(s),
@@ -432,6 +444,10 @@ pub struct SecurePart<T> {
 impl<T: InvisibleSideEffectFree> SecurePart<T> {
     #[side_effect_free_attr(method)]
     pub fn new(t: T, k: KeyWrapper, c: T, l: u32, r: bool, ic: bool, m: ModifiersWrapper, cc: u32, kc: u32) -> SecurePart<T>{
+        unchecked_operation(
+            #[cfg(feature = "servo_benchmarking_funcs")]
+            println!("{}:{}", file!(), line!())
+        );
         SecurePart{
             type_: t,
             key: k,
@@ -449,86 +465,122 @@ unsafe impl<T: InvisibleSideEffectFree> InvisibleSideEffectFree for SecurePart<T
 
 #[side_effect_free_attr]
 pub fn custom_rev(self_: unicode_segmentation::UWordBounds) -> std::iter::Rev<unicode_segmentation::UWordBounds> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.rev())
 }
 
 #[side_effect_free_attr]
 pub fn custom_next_rev<'a>(self_: &mut std::iter::Rev<unicode_segmentation::UWordBounds<'a>>) -> Option<&'a str> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.next())
 }
 
 #[side_effect_free_attr]
 pub fn custom_next_uwordbounds<'a>(self_: &mut unicode_segmentation::UWordBounds<'a>) -> Option<&'a str> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.next())
 }
 
 #[side_effect_free_attr]
 pub fn custom_split_word_bounds<'a>(self_: &&'a str) -> unicode_segmentation::UWordBounds<'a> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.split_word_bounds())
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_graphemes(self_: &str, is_extended: bool) -> unicode_segmentation::Graphemes {
-    unchecked_operation(self_.graphemes(is_extended))
+    self_.graphemes(is_extended)
 }
 
 #[side_effect_free_attr]
 pub fn custom_next_back<'a>(self_: &mut unicode_segmentation::Graphemes<'a>) -> Option<&'a str> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.next_back())
 }
 
 #[side_effect_free_attr]
 pub fn custom_take_graphemes<'a>(self_: unicode_segmentation::Graphemes<'a>, n: usize) -> std::iter::Take<unicode_segmentation::Graphemes<'a>> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.take(n))
 }
 
 #[side_effect_free_attr]
 pub fn custom_take_charindices<'a>(self_: std::str::CharIndices<'a>, n: usize) -> std::iter::Take<std::str::CharIndices<'a>> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.take(n))
 }
 
 #[side_effect_free_attr]
 pub fn custom_fold<'a, F: FnMut(usize, &'a str) -> usize>(self_: std::iter::Take<unicode_segmentation::Graphemes<'a>>, init: usize, f: F) -> usize {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.fold(init, f))
 }
 
 //Carapace: TODO: add to allowlist
 #[side_effect_free_attr]
 pub fn custom_last<'a>(self_: std::iter::Take<std::str::CharIndices<'a>>) -> Option<(usize, char)> {
+    unchecked_operation(
+        #[cfg(any(feature = "servo_benchmarking_funcs", feature = "servo_benchmarking_unchecked"))]
+        println!("{}:{}", file!(), line!())
+    );
     unchecked_operation(self_.last())
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_contains(self_: &ModifiersWrapper, other: ModifiersWrapper) -> bool {
-    unchecked_operation(self_.m.contains(other.m))
+    /*unchecked_operation(*/self_.m.contains(other.m)/*)*/
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_remove(self_: &mut ModifiersWrapper, other: ModifiersWrapper) {
-    unchecked_operation(self_.m.remove(other.m))
+    self_.m.remove(other.m)
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_clone_key_state_wrapper(self_: &KeyStateWrapper) -> KeyStateWrapper {
-    unchecked_operation(self_.clone())
+    self_.clone()
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_clone_key_wrapper(self_: &KeyWrapper) -> KeyWrapper {
-    unchecked_operation(self_.clone())
+    self_.clone()
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_clone_location_wrapper(self_: &LocationWrapper) -> LocationWrapper {
-    unchecked_operation(self_.clone())
+    self_.clone()
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_clone_code_wrapper(self_: &CodeWrapper) -> CodeWrapper {
-    unchecked_operation(self_.clone())
+    self_.clone()
 }
 
-#[side_effect_free_attr]
+//#[side_effect_free_attr]
 pub fn custom_clone_modifiers_wrapper(self_: &ModifiersWrapper) -> ModifiersWrapper {
-    unchecked_operation(self_.clone())
+    self_.clone()
 }
