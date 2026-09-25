@@ -52,8 +52,9 @@ pub extern "C" fn alloc_printer() {
 }
 
 pub fn main() {
-    unsafe { elytron_lib::set_pkru(0); }
+    //unsafe { elytron_lib::set_pkru(0); }
     println!("Pre-initialize");
+    elytron_lib::atexit_print_timing();
     elytron_lib::run_in_child_thread(|| {
         elytron_lib::initialize_sandboxes();
         unsafe { libc::atexit(alloc_printer); }
