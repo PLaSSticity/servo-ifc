@@ -119,9 +119,15 @@ impl LayoutHTMLTextAreaElementHelpers for LayoutDom<'_, HTMLTextAreaElement> {
         #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
         println!("{}:{}", file!(), line!());
         //ELYTRON: TIMING_FLAG
-        if trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, boolean_test.get_dyn_sec_label_ref(), boolean_test.get_dyn_int_label_ref(), {
-            unwrap(boolean_test)
-        }).clone() {
+        if {
+            let trust_ret1 = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, boolean_test.get_dyn_sec_label_ref(), boolean_test.get_dyn_int_label_ref(), {
+                unwrap(boolean_test)
+            });
+            let start1 = std::time::Instant::now();
+            let ret1 = trust_ret1.clone();
+            unsafe { elytron_lib::CLONE_TIMING += start1.elapsed(); }
+            ret1
+        } {
             // FIXME(nox): Would be cool to not allocate a new string if the
             // placeholder is single line, but that's an unimportant detail.
             self.placeholder()
@@ -132,9 +138,13 @@ impl LayoutHTMLTextAreaElementHelpers for LayoutDom<'_, HTMLTextAreaElement> {
             #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
             println!("{}:{}", file!(), line!());
             //ELYTRON: TIMING_FLAG
-            trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
+            let trust_ret2 = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
                 unwrap(text)
-            }).clone().into()
+            });
+            let start2 = std::time::Instant::now();
+            let ret2 = trust_ret2.clone();
+            unsafe { elytron_lib::CLONE_TIMING += start2.elapsed(); }
+            ret2.into()
         }
     }
 
@@ -391,9 +401,15 @@ impl HTMLTextAreaElementMethods for HTMLTextAreaElement {
         #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
         println!("{}:{}", file!(), line!());
         //ELYTRON: TIMING_FLAG
-        if trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, boolean_test.get_dyn_sec_label_ref(), boolean_test.get_dyn_int_label_ref(), {
-            unwrap(boolean_test)
-        }).clone() {
+        if {
+            let trust_ret = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, boolean_test.get_dyn_sec_label_ref(), boolean_test.get_dyn_int_label_ref(), {
+                unwrap(boolean_test)
+            });
+            let start = std::time::Instant::now();
+            let ret = trust_ret.clone();
+            unsafe { elytron_lib::CLONE_TIMING += start.elapsed(); }
+            ret
+        } {
             // Step 4
             textinput.clear_selection_to_limit(Direction::Forward);
         }

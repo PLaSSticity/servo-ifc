@@ -3629,7 +3629,7 @@ impl ScriptThread {
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let state: SecureValue<KeyStateWrapper, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>> = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret1: SecureValue<KeyStateWrapper, sec_lat::Label_Empty, int_lat::Label_All, DynLabel<Sec>, DynLabel<Int>> = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         unchecked_operation(
@@ -3639,11 +3639,15 @@ impl ScriptThread {
                         wrap(elytron_lib::call_sandbox_closure_timing(|u| {
                             custom_clone_key_state_wrapper(u)
                         }, unwrap_ref(&key_event.state)))
-                }).clone();
+                });
+                let start1 = std::time::Instant::now();
+                let ret1 = trust_ret1.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start1.elapsed(); }
+                let state = ret1;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let key = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret2 = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         unchecked_operation(
@@ -3653,11 +3657,15 @@ impl ScriptThread {
                         wrap(elytron_lib::call_sandbox_closure_timing(|u| {
                             custom_clone_key_wrapper(u)
                         }, unwrap_ref(&key_event.key)))
-                }).clone();
+                });
+                let start2 = std::time::Instant::now();
+                let ret2 = trust_ret2.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start2.elapsed(); }
+                let key = ret2;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let code = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret3 = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         unchecked_operation(
@@ -3667,11 +3675,15 @@ impl ScriptThread {
                         wrap(elytron_lib::call_sandbox_closure_timing(|u| {
                             custom_clone_code_wrapper(u)
                         }, unwrap_ref(&key_event.code)))
-                }).clone();
+                });
+                let start3 = std::time::Instant::now();
+                let ret3 = trust_ret3.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start3.elapsed(); }
+                let code = ret3;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let location = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret4 = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         unchecked_operation(
@@ -3681,11 +3693,15 @@ impl ScriptThread {
                         wrap(elytron_lib::call_sandbox_closure_timing(|u| {
                             custom_clone_location_wrapper(u)
                         }, unwrap_ref(&key_event.location)))
-                }).clone();
+                });
+                let start4 = std::time::Instant::now();
+                let ret4 = trust_ret4.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start4.elapsed(); }
+                let location = ret4;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let modifiers = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret5 = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         unchecked_operation(
@@ -3695,23 +3711,35 @@ impl ScriptThread {
                         wrap(elytron_lib::call_sandbox_closure_timing(|u| {
                             custom_clone_modifiers_wrapper(u)
                         }, unwrap_ref(&key_event.modifiers)))
-                }).clone();
+                });
+                let start5 = std::time::Instant::now();
+                let ret5 = trust_ret.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start5.elapsed(); }
+                let modifiers = ret5;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let repeat = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret6 = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         wrap(*unwrap_ref(&key_event.repeat))
-                }).clone();
+                });
+                let start6 = std::time::Instant::now();
+                let ret6 = trust_ret6.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start6.elapsed(); }
+                let repeat = ret6;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let is_composing = partial_trusted_secure_block_dynamic_all!(
+                let trust_ret7 = partial_trusted_secure_block_dynamic_all!(
                     sec_lat::Label_A, int_lat::Label_All, &dynamic_sec_label_old, &dynamic_int_label,
                     sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                         wrap(*unwrap_ref(&key_event.is_composing))
-                }).clone();
+                });
+                let start7 = std::time::Instant::now();
+                let ret7 = trust_ret7.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start7.elapsed(); }
+                let is_composing = ret7;
                 let key_event_dl = SecKeyboardEvent::<sec_lat::Label_Empty, int_lat::Label_All>{state, key, code, location, modifiers, repeat, is_composing};
                 document.dispatch_key_event(key_event_dl);
             },

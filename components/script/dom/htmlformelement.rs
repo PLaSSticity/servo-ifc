@@ -985,7 +985,11 @@ impl HTMLFormElement {
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(sb) }).clone()
+                let trust_ret = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(sb) });
+                let start = std::time::Instant::now();
+                let ret = trust_ret.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start.elapsed(); }
+                ret
             }
         };
 
@@ -1019,7 +1023,12 @@ impl HTMLFormElement {
                     //ELYTRON: TIMING_FLAG
                     #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                     println!("{}:{}", file!(), line!()); 
-                    trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(svs) }).clone()})
+                    let trust_ret = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dec_sec_label, &dec_int_label, { unwrap(svs) });
+                    let start = std::time::Instant::now();
+                    let ret = trust_ret.clone();
+                    unsafe { elytron_lib::CLONE_TIMING += start.elapsed(); }
+                    ret
+                })
             }
         });
         url.as_mut_url()

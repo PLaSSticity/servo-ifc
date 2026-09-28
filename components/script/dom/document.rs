@@ -1906,9 +1906,13 @@ impl Document {
         #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
         println!("{}:{}", file!(), line!());
         //ELYTRON: TIMING_FLAG
-        let conditional = trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
+        let trust_ret1 = trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
             unwrap(cond)
-        }).clone();
+        });
+        let start1 = std::time::Instant::now();
+        let ret1 = trust_ret1.clone();
+        unsafe { elytron_lib::CLONE_TIMING += start1.elapsed(); }
+        let conditional = ret1;
         // https://w3c.github.io/uievents/#keys-cancelable-keys
         if conditional //Carapace: Computed conditional in above block and used it here. 
         {
@@ -1971,9 +1975,13 @@ impl Document {
             #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
             println!("{}:{}", file!(), line!());
             //ELYTRON: TIMING_FLAG
-            let conditional2 = trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
+            let trust_ret2 = trusted_secure_block_dynamic_all!(sec_lat::Label_A, int_lat::Label_All, &label_s, &label_i, {
                 unwrap(cond)
-            }).clone();
+            });
+            let start2 = std::time::Instant::now();
+            let ret2 = trust_ret2.clone();
+            unsafe { elytron_lib::CLONE_TIMING += start2.elapsed(); }
+            let conditional2 = ret2;
             if conditional2 //Carapace: Computed conditional in above block and used it here
             {
                 if let Some(elem) = target.downcast::<Element>() {

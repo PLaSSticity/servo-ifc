@@ -627,7 +627,11 @@ impl Extractable for FormData {
             MaybeSecret::Secret(sb) => {
                 #[cfg(feature = "servo_benchmarking_blocks")]
                 println!("{}:{}", file!(), line!()); 
-                trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, sb.get_dyn_sec_label_ref(), sb.get_dyn_int_label_ref(), { unwrap(sb) }).clone()
+                let trust_ret = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, sb.get_dyn_sec_label_ref(), sb.get_dyn_int_label_ref(), { unwrap(sb) });
+                let start = std::time::Instant::now();
+                let ret = trust_ret.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start.elapsed(); }
+                ret
             }
         };
         let total_bytes = unwrapped_bytes.len();

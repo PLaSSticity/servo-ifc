@@ -50,6 +50,7 @@ use crate::textinput::KeyReaction::{
 };
 use crate::textinput::Lines::Single;
 use crate::textinput::{Direction, SelectionDirection, TextInput, UTF16CodeUnits, UTF8Bytes};
+use canvas_traits::webgl::TexFormat::CompressedRgbEtc1;
 use chrono::naive::{NaiveDate, NaiveDateTime};
 use chrono::{Datelike, Weekday};
 use dom_struct::dom_struct;
@@ -1059,7 +1060,7 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let ret : String =
+                let trust_ret1 : String =
                 trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                     let text = unwrap_ref(&sectext);
                     unchecked_operation(
@@ -1089,8 +1090,11 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                     } else {
                         placeholder
                     }
-                }).clone();
-                ret.into()
+                });
+                let start1 = std::time::Instant::now();
+                let ret1 = trust_ret1.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start1.elapsed(); }
+                ret1.into()
             },
             _ => {
                 let domain_tag = unsafe { self.upcast::<HTMLElement>().unsafe_get() }.get_domain_secrecy_tag().unwrap();
@@ -1103,7 +1107,7 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let ret : String =
+                let trust_ret2 : String =
                 trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, &dynamic_sec_label, &dynamic_int_label, {
                     unchecked_operation(
                         #[cfg(feature = "servo_benchmarking_sandboxes")]
@@ -1115,8 +1119,11 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                     } else {
                         placeholder
                     }
-                }).clone();
-                ret.into()
+                });
+                let start2 = std::time::Instant::now();
+                let ret2 = trust_ret2.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start2.elapsed(); }
+                ret2.into()
             },
         }
     }
@@ -1145,7 +1152,7 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let char_start = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
+                let trust_ret1 = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&text);
                     unchecked_operation(
                         #[cfg(feature = "servo_benchmarking_sandboxes")]
@@ -1153,11 +1160,15 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                     );
                     let s = elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped) }, ());
                     std::str::Chars::count(core::primitive::str::chars(&s[..sel.start]))
-                }).clone();
+                });
+                let start1 = std::time::Instant::now();
+                let ret1 = trust_ret1.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start1.elapsed(); }
+                let char_start = ret1;
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                let char_end = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
+                let trust_ret2 = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, text.get_dyn_sec_label_ref(), text.get_dyn_int_label_ref(), {
                     let unwrapped = unwrap_ref(&text);
                     unchecked_operation(
                         #[cfg(feature = "servo_benchmarking_sandboxes")]
@@ -1165,7 +1176,11 @@ impl<'dom> LayoutHTMLInputElementHelpers<'dom> for LayoutDom<'dom, HTMLInputElem
                     );
                     let s = elytron_lib::call_sandbox_closure_timing(|a: ()| { DOMString::to_str_ref(unwrapped) }, ());
                     char_start + std::str::Chars::count(core::primitive::str::chars(&s[sel]))
-                }).clone();
+                });
+                let start2 = std::time::Instant::now();
+                let ret2 = trust_ret2.clone();
+                unsafe { elytron_lib::CLONE_TIMING += start2.elapsed(); }
+                let char_end = ret2;
 
                 let bytes_per_char = PASSWORD_REPLACEMENT_CHAR.len_utf8();
                 Some(char_start * bytes_per_char..char_end * bytes_per_char)
@@ -1395,9 +1410,15 @@ impl HTMLInputElementMethods for HTMLInputElement {
                 #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                 println!("{}:{}", file!(), line!());
                 //ELYTRON: TIMING_FLAG
-                if trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, cond.get_dyn_sec_label_ref(), cond.get_dyn_int_label_ref(), {
-                    unwrap(cond)
-                }).clone() {
+                if {
+                    let trust_ret = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, cond.get_dyn_sec_label_ref(), cond.get_dyn_int_label_ref(), {
+                        unwrap(cond)
+                    });
+                    let start = std::time::Instant::now();
+                    let ret = trust_ret.clone();
+                    unsafe { elytron_lib::CLONE_TIMING += start.elapsed(); }
+                    ret
+                } {
                     // Steps 1-2
                     textinput.set_content(secnewval);
 
@@ -2574,9 +2595,10 @@ impl VirtualMethods for HTMLInputElement {
                                     #[cfg(any(feature = "servo_benchmarking_blocks", feature = "servo_benchmarking_trusted"))]
                                     println!("{}:{}", file!(), line!());
                                     //ELYTRON: TIMING_FLAG
-                                    trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), {
+                                    let ret_value = trusted_secure_block_dynamic_all!(sec_lat::Label_Empty, int_lat::Label_All, content.get_dyn_sec_label_ref(), content.get_dyn_int_label_ref(), {
                                         unwrap(content)
-                                    }).clone()
+                                    });
+                                    ret_value.clone()
                                 } else {
                                     self.Value()
                                 }
